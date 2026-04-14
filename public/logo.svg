@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="dark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B1578"/>
+      <stop offset="100%" stop-color="#4A1D96"/>
+    </linearGradient>
+    <linearGradient id="mid" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6D3BC4"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+    <linearGradient id="light" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#A78BFA"/>
+      <stop offset="100%" stop-color="#C4B5FD"/>
+    </linearGradient>
+  </defs>
+  <!-- Pentagonal impossible ring — 3 purple bands -->
+  <!-- Outer dark band -->
+  <path d="M100 12 L178 68 L148 160 L52 160 L22 68 Z" fill="none" stroke="url(#dark)" stroke-width="28" stroke-linejoin="round"/>
+  <!-- Middle band -->
+  <path d="M100 28 L166 76 L140 152 L60 152 L34 76 Z" fill="none" stroke="url(#mid)" stroke-width="18" stroke-linejoin="round"/>
+  <!-- Inner light band -->
+  <path d="M100 44 L154 84 L132 144 L68 144 L46 84 Z" fill="none" stroke="url(#light)" stroke-width="10" stroke-linejoin="round"/>
+</svg>
