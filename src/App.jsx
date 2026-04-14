@@ -2,15 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 
 const CALENDLY_URL = 'https://calendly.com/hello-rebootmedia/diagnostic';
 
-/* ─── Inline Logo SVG ─── */
+/* ─── Logo ─── */
 
 function Logo({ className = 'w-9 h-9' }) {
   return (
-    <svg className={className} viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M100 12 L178 68 L148 160 L52 160 L22 68 Z" fill="none" stroke="#3B1578" strokeWidth="28" strokeLinejoin="round"/>
-      <path d="M100 28 L166 76 L140 152 L60 152 L34 76 Z" fill="none" stroke="#7C3AED" strokeWidth="18" strokeLinejoin="round"/>
-      <path d="M100 44 L154 84 L132 144 L68 144 L46 84 Z" fill="none" stroke="#A78BFA" strokeWidth="10" strokeLinejoin="round"/>
-    </svg>
+    <img src="/logo.png" alt="Reboot Media" className={className} />
   );
 }
 
