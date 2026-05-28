@@ -1,108 +1,19 @@
-import { useState, useEffect, useRef } from 'react';
-
 const CALENDLY_URL = 'https://calendly.com/hello-rebootmedia/diagnostic';
 
-/* ─── Logo ─── */
-
-function Logo({ className = 'w-9 h-9' }) {
-  return (
-    <img src="/logo.png" alt="Reboot Media" className={className} />
-  );
+function Logo({ className = 'w-7 h-7' }) {
+  return <img src="/logo.png" alt="Reboot Media" className={className} />;
 }
 
-/* ─── Icons ─── */
-
-function IconSignalSlash({ className }) {
+function IconArrowRight({ className = 'w-4 h-4' }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M2 20h.01" /><path d="M7 20v-4" /><path d="M12 20v-8" /><path d="M17 20v-12" /><path d="M22 4v16" />
-      <line x1="2" y1="2" x2="22" y2="22" stroke="currentColor" strokeWidth="2.5" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+      <polyline points="12 5 19 12 12 19" />
     </svg>
   );
 }
 
-function IconTarget({ className }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" />
-    </svg>
-  );
-}
-
-function IconBarChart({ className }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="12" y1="20" x2="12" y2="10" /><line x1="18" y1="20" x2="18" y2="4" /><line x1="6" y1="20" x2="6" y2="16" />
-    </svg>
-  );
-}
-
-function IconShield({ className }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-    </svg>
-  );
-}
-
-function IconZap({ className }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-    </svg>
-  );
-}
-
-function IconCheck({ className }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  );
-}
-
-function IconX({ className }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-    </svg>
-  );
-}
-
-function IconArrowRight({ className }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
-    </svg>
-  );
-}
-
-function IconPhone({ className }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" />
-    </svg>
-  );
-}
-
-function IconMail({ className }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-      <polyline points="22,6 12,13 2,6" />
-    </svg>
-  );
-}
-
-function IconCalendar({ className }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
-    </svg>
-  );
-}
-
-function IconLinkedIn({ className }) {
+function IconLinkedIn({ className = 'w-4 h-4' }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor">
       <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
@@ -110,728 +21,269 @@ function IconLinkedIn({ className }) {
   );
 }
 
-function IconMenu({ className }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
-    </svg>
-  );
-}
-
-function IconClose({ className }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-    </svg>
-  );
-}
-
-/* ─── Animated counter ─── */
-
-function useCountUp(end, duration = 2000, startOnView = true) {
-  const [count, setCount] = useState(0);
-  const [started, setStarted] = useState(false);
-  const ref = useRef(null);
-
-  useEffect(() => {
-    if (!startOnView) { setStarted(true); return; }
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting && !started) setStarted(true); },
-      { threshold: 0.3 }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [started, startOnView]);
-
-  useEffect(() => {
-    if (!started) return;
-    let startTime = null;
-    const step = (timestamp) => {
-      if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setCount(Math.floor(eased * end));
-      if (progress < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-  }, [started, end, duration]);
-
-  return { count, ref };
-}
-
-/* ─── Fade-in ─── */
-
-function FadeIn({ children, className = '', delay = 0 }) {
-  const ref = useRef(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
-      { threshold: 0.15 }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div
-      ref={ref}
-      className={`transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} ${className}`}
-      style={{ transitionDelay: `${delay}ms` }}
-    >
-      {children}
-    </div>
-  );
-}
-
-/* ─── CTA Button ─── */
-
-function CTAButton({ children, variant = 'primary', className = '', href = CALENDLY_URL }) {
-  const base = 'inline-flex items-center gap-2 font-semibold rounded-lg transition-all duration-200 text-center justify-center';
-  const variants = {
-    primary: 'bg-accent text-white hover:bg-accent-dark shadow-lg shadow-accent/20 hover:shadow-accent/35 px-8 py-4 text-lg',
-    secondary: 'bg-accent-bg text-accent border border-accent/20 hover:bg-accent/10 px-8 py-4 text-lg',
-    small: 'bg-accent text-white hover:bg-accent-dark shadow-lg shadow-accent/20 px-6 py-3 text-base',
-    'small-outline': 'bg-white text-accent border border-accent/20 hover:bg-accent-bg px-6 py-3 text-base',
-    'primary-dark': 'bg-white text-brand-950 hover:bg-slate-100 shadow-lg px-8 py-4 text-lg',
+function CTAButton({ children, variant = 'primary', href = CALENDLY_URL }) {
+  const base = 'inline-flex items-center gap-2 bg-accent text-white font-semibold rounded-lg hover:bg-accent-dark transition-colors';
+  const sizes = {
+    primary: 'px-6 py-3 text-base',
+    small: 'px-4 py-2 text-sm',
   };
   return (
-    <a href={href} target="_blank" rel="noopener noreferrer" className={`${base} ${variants[variant]} ${className}`}>
+    <a href={href} target="_blank" rel="noopener noreferrer" className={`${base} ${sizes[variant]}`}>
       {children}
     </a>
   );
 }
 
-/* ─── Navigation ─── */
-
-function Nav() {
-  const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  const links = [
-    { label: 'The Problem', href: '#problem' },
-    { label: 'What I Fix', href: '#solution' },
-    { label: 'The Math', href: '#math' },
-    { label: 'How It Works', href: '#process' },
-    { label: 'About', href: '#about' },
-  ];
-
+function Section({ id, label, children }) {
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-100' : 'bg-transparent'}`}>
-      <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-        <a href="#" className="flex items-center gap-2.5">
-          <Logo className="w-9 h-9" />
-          <span className="font-bold text-xl tracking-tight text-brand-950">
-            Reboot<span className="text-accent">Media</span>
-          </span>
-        </a>
-
-        <div className="hidden md:flex items-center gap-8">
-          {links.map(l => (
-            <a key={l.href} href={l.href} className="text-sm font-medium transition-colors text-slate-600 hover:text-brand-950">
-              {l.label}
-            </a>
-          ))}
-          <CTAButton variant="small">
-            Book Diagnostic
-            <IconArrowRight className="w-4 h-4" />
-          </CTAButton>
+    <section id={id} className="border-t border-slate-200">
+      <div className="max-w-5xl mx-auto px-6 py-14 md:py-16 grid md:grid-cols-12 gap-6 md:gap-10">
+        <div className="md:col-span-3">
+          <p className="text-xs uppercase tracking-widest text-slate-500 font-medium">{label}</p>
         </div>
-
-        <button className="md:hidden text-brand-950 p-2" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Toggle menu">
-          {mobileOpen ? <IconClose className="w-6 h-6" /> : <IconMenu className="w-6 h-6" />}
-        </button>
+        <div className="md:col-span-9">{children}</div>
       </div>
-
-      {mobileOpen && (
-        <div className="md:hidden bg-white border-t border-slate-100 px-6 pb-6 pt-2 shadow-lg">
-          {links.map(l => (
-            <a key={l.href} href={l.href} className="block py-3 text-slate-600 hover:text-brand-950 text-base font-medium transition-colors border-b border-slate-50" onClick={() => setMobileOpen(false)}>
-              {l.label}
-            </a>
-          ))}
-          <div className="pt-4">
-            <CTAButton variant="small" className="w-full">
-              Book Diagnostic <IconArrowRight className="w-4 h-4" />
-            </CTAButton>
-          </div>
-        </div>
-      )}
-    </nav>
+    </section>
   );
 }
 
-/* ─── Hero ─── */
+function Nav() {
+  return (
+    <header className="max-w-5xl mx-auto px-6 py-5 flex items-center justify-between">
+      <a href="#" className="flex items-center gap-2.5">
+        <Logo className="w-7 h-7" />
+        <span className="font-bold text-base text-brand-950 tracking-tight">Reboot Media</span>
+      </a>
+      <nav className="flex items-center gap-6 md:gap-8">
+        <a href="#approach" className="text-sm text-slate-600 hover:text-brand-950 transition-colors hidden sm:inline">Approach</a>
+        <a href="#fit" className="text-sm text-slate-600 hover:text-brand-950 transition-colors hidden sm:inline">Fit</a>
+        <a href="#about" className="text-sm text-slate-600 hover:text-brand-950 transition-colors hidden sm:inline">About</a>
+        <CTAButton variant="small">
+          Book a call <IconArrowRight className="w-3.5 h-3.5" />
+        </CTAButton>
+      </nav>
+    </header>
+  );
+}
 
 function Hero() {
   return (
-    <section className="relative min-h-screen flex items-center bg-white overflow-hidden">
-      {/* Subtle grid */}
-      <div className="absolute inset-0 opacity-[0.4]" style={{
-        backgroundImage: 'linear-gradient(rgba(124,58,237,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(124,58,237,0.03) 1px, transparent 1px)',
-        backgroundSize: '60px 60px'
-      }} />
-      {/* Soft gradient blobs */}
-      <div className="absolute top-1/4 -right-40 w-[600px] h-[600px] bg-accent/[0.06] rounded-full blur-[140px]" />
-      <div className="absolute bottom-0 -left-40 w-[500px] h-[500px] bg-accent-muted/[0.08] rounded-full blur-[120px]" />
-
-      <div className="relative max-w-6xl mx-auto px-6 pt-32 pb-20 md:pt-40 md:pb-28">
-        <div className="max-w-3xl">
-          <FadeIn>
-            <div className="inline-flex items-center gap-2 bg-red-50 text-danger border border-red-100 rounded-full px-4 py-1.5 text-sm font-medium mb-8">
-              <span className="w-2 h-2 bg-danger rounded-full animate-pulse" />
-              78.2% of Google Ads advertisers lose money
-            </div>
-          </FadeIn>
-
-          <FadeIn delay={100}>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-brand-950 leading-[1.08] tracking-tight mb-6">
-              Your ads didn't fail.
-              <br />
-              <span className="text-accent">Your tracking did.</span>
-            </h1>
-          </FadeIn>
-
-          <FadeIn delay={200}>
-            <p className="text-lg sm:text-xl text-slate-600 leading-relaxed mb-10 max-w-2xl">
-              You were right to stop spending. But Google Ads wasn't the problem.
-              Nobody installed the tracking that tells Google which clicks turn into jobs.
-              Your budget was running blind.
-            </p>
-          </FadeIn>
-
-          <FadeIn delay={300}>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <CTAButton>
-                See What's Broken in 13 Minutes
-                <IconArrowRight className="w-5 h-5" />
-              </CTAButton>
-              <CTAButton variant="secondary" href="#problem">
-                How This Happens
-              </CTAButton>
-            </div>
-          </FadeIn>
-
-          <FadeIn delay={400}>
-            <div className="mt-14 flex flex-wrap gap-x-10 gap-y-4 text-sm text-slate-500">
-              <div className="flex items-center gap-2">
-                <IconBarChart className="w-4 h-4 text-accent" />
-                <span>$228 avg. cost per roofing lead</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <IconTarget className="w-4 h-4 text-accent" />
-                <span>3.7% industry conversion rate</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <IconZap className="w-4 h-4 text-success" />
-                <span>7-10% with proper tracking</span>
-              </div>
-            </div>
-          </FadeIn>
-        </div>
-      </div>
-
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-slate-400 text-xs">
-        <span>Scroll</span>
-        <div className="w-5 h-8 border-2 border-slate-300 rounded-full flex justify-center pt-1.5">
-          <div className="w-1 h-2 bg-slate-400 rounded-full animate-bounce" />
-        </div>
+    <section className="max-w-5xl mx-auto px-6 pt-10 pb-20 md:pt-14 md:pb-24">
+      <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-brand-950 leading-[1.1] tracking-tight max-w-3xl">
+        Google Ads for roofing companies. Done right,<br className="hidden md:block" /> your phone rings.
+      </h1>
+      <p className="mt-6 text-base md:text-lg text-slate-600 leading-relaxed max-w-2xl">
+        Most roofers lose money on Google Ads — not because ads don't work, because the system underneath them is broken. We fix that, then we run them.
+      </p>
+      <div className="mt-8 flex items-center gap-5 flex-wrap">
+        <CTAButton>
+          Book a 15-min diagnostic <IconArrowRight className="w-4 h-4" />
+        </CTAButton>
+        <span className="text-sm text-slate-500">No pitch. No pressure.</span>
       </div>
     </section>
   );
 }
 
-/* ─── Problem Section ─── */
+function Approach() {
+  return (
+    <Section id="approach" label="Approach">
+      <h2 className="text-2xl md:text-3xl font-bold text-brand-950 leading-tight mb-5">
+        Google Ads. Just Google Ads.
+      </h2>
+      <div className="space-y-4 text-slate-700 leading-relaxed">
+        <p>
+          Most agencies sell you eight services and execute zero of them well. We sell one. If you want a partner who handles your social, email, content, and PR — we are the wrong shop.
+        </p>
+        <p>
+          If you want someone who installs the tracking the right way, builds the campaigns the right way, and shows you exactly which calls turned into jobs — keep reading.
+        </p>
+        <p className="font-semibold text-brand-950">
+          The reason most roofers lose money isn't the algorithm. It's that the data Google needs to optimize was never sent. We fix that first.
+        </p>
+      </div>
+    </Section>
+  );
+}
 
-function Problem() {
-  const problems = [
+function WhatWeInstall() {
+  const items = [
     {
-      icon: <IconPhone className="w-6 h-6" />,
-      title: 'Invisible phone calls',
-      desc: "Someone clicks your ad, calls you, and books a $15,000 roof job. Google has no idea that call happened. So it keeps spending on clicks that go nowhere.",
+      title: 'Google Ads setup verification',
+      desc: 'Conversion tracking installed and tested so Google can actually see your leads.',
     },
     {
-      icon: <IconSignalSlash className="w-6 h-6" />,
-      title: 'Zero conversion data',
-      desc: "Your ad platform is supposed to learn what works. But without tracking, there's nothing to learn from. It's guessing which clicks matter — with your wallet.",
+      title: 'Phone call + form tracking',
+      desc: 'Every call from an ad and every form fill, tied back to the click that caused it.',
     },
     {
-      icon: <IconTarget className="w-6 h-6" />,
-      title: 'Wasted budget, wrong blame',
-      desc: "You spent $5,000 a month and got no results. You blamed the ads. Your agency blamed your market. The real problem? Nobody installed the measurement that connects spend to revenue.",
+      title: 'CRM verification',
+      desc: "Leads land in your CRM, not just your inbox. We confirm they do — before you spend.",
     },
     {
-      icon: <IconBarChart className="w-6 h-6" />,
-      title: 'The industry average is broken',
-      desc: "Roofing has a 3.7% conversion rate — the lowest in home services. Not because roofing is hard to sell. Because almost nobody has proper tracking installed.",
+      title: 'Landing page review',
+      desc: "We check the page the ad sends traffic to. If it leaks, you'll know what to fix.",
     },
   ];
-
   return (
-    <section id="problem" className="bg-slate-50 py-20 md:py-28">
-      <div className="max-w-6xl mx-auto px-6">
-        <FadeIn>
-          <div className="max-w-2xl mb-16">
-            <p className="text-accent font-semibold text-sm uppercase tracking-wider mb-3">The real problem</p>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-brand-950 leading-tight mb-5">
-              Your ads were never the problem.
-              <br />
-              <span className="text-danger">Your data was.</span>
-            </h2>
-            <p className="text-slate-600 text-lg leading-relaxed">
-              Roofing has the highest cost per lead in all of home services — $228 on average.
-              But that number isn't because Google Ads doesn't work. It's because the tracking
-              that tells Google what's working was never installed.
-            </p>
-          </div>
-        </FadeIn>
-
-        <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
-          {problems.map((p, i) => (
-            <FadeIn key={i} delay={i * 100}>
-              <div className="bg-white border border-slate-200 rounded-2xl p-7 md:p-8 hover:shadow-lg hover:shadow-slate-200/60 transition-shadow duration-300">
-                <div className="w-12 h-12 bg-red-50 text-danger rounded-xl flex items-center justify-center mb-5">
-                  {p.icon}
-                </div>
-                <h3 className="text-xl font-bold text-brand-950 mb-3">{p.title}</h3>
-                <p className="text-slate-600 leading-relaxed">{p.desc}</p>
-              </div>
-            </FadeIn>
-          ))}
-        </div>
-
-        <FadeIn delay={400}>
-          <div className="mt-14 bg-brand-950 rounded-2xl p-8 md:p-10 flex flex-col md:flex-row items-center gap-6 md:gap-10">
-            <div className="flex-1">
-              <p className="text-accent-light font-bold text-5xl md:text-6xl mb-2">78.2%</p>
-              <p className="text-white text-lg font-medium">of Google Ads advertisers lose money.</p>
-              <p className="text-slate-400 mt-2">Not because ads don't work. Because they run blind.</p>
-            </div>
-            <CTAButton variant="primary-dark" className="shrink-0">
-              Find Out If You're One of Them
-              <IconArrowRight className="w-5 h-5" />
-            </CTAButton>
-          </div>
-        </FadeIn>
-      </div>
-    </section>
+    <Section label="What we install">
+      <h2 className="text-2xl md:text-3xl font-bold text-brand-950 leading-tight mb-4">
+        Process transparency. No mystery.
+      </h2>
+      <p className="text-slate-700 leading-relaxed mb-8">
+        Before a single ad goes live, we install and verify the system underneath. Every item below is documented with proof it's firing.
+      </p>
+      <ul className="grid sm:grid-cols-2 gap-x-10 gap-y-6">
+        {items.map((item) => (
+          <li key={item.title} className="border-b border-dotted border-slate-300 pb-4">
+            <p className="font-semibold text-brand-950 mb-1">{item.title}</p>
+            <p className="text-sm text-slate-600 leading-relaxed">{item.desc}</p>
+          </li>
+        ))}
+      </ul>
+    </Section>
   );
 }
 
-/* ─── Solution Section ─── */
+function Focus() {
+  const notOffered = ['Web design', 'Email marketing', 'Social media', 'SEO content', 'PR', 'Branding', 'Funnels'];
+  return (
+    <Section label="Focus">
+      <h2 className="text-2xl md:text-3xl font-bold text-brand-950 leading-tight mb-6">
+        We do one thing. We do it monastically. We don't offer:
+      </h2>
+      <p className="text-slate-400 leading-relaxed flex flex-wrap gap-x-5 gap-y-2">
+        {notOffered.map((item, i) => (
+          <span key={item}>
+            <s>{item}</s>
+            {i < notOffered.length - 1 && <span className="ml-5 text-slate-300" aria-hidden>·</span>}
+          </span>
+        ))}
+      </p>
+    </Section>
+  );
+}
 
-function Solution() {
-  const layers = [
+function Fit() {
+  const signals = [
     {
-      icon: <IconShield className="w-7 h-7" />,
-      label: 'Infrastructure Fix',
-      tag: 'One-time',
-      title: "Know exactly what's broken",
-      points: ['Full tracking audit of your site', 'Conversion tags installed and verified', 'Call tracking on every phone number', 'Written report with proof everything fires'],
-      color: 'purple',
-      timeline: '5 business days',
+      num: '01',
+      title: "You're running ads with no idea what's working.",
+      desc: "Google can't optimize what it can't see. If your conversion tracking isn't installed right, every dollar is a guess.",
     },
     {
-      icon: <IconTarget className="w-7 h-7" />,
-      label: 'Ads Management',
-      tag: 'Monthly',
-      title: 'Every dollar tracked and accountable',
-      points: ['Full Google Ads campaign build and management', 'Conversion-focused landing page', 'Weekly optimization and keyword pruning', 'Monthly report tied to actual revenue'],
-      color: 'green',
-      timeline: 'First leads week 1-2',
+      num: '02',
+      title: "You ran ads. They didn't work. So you stopped.",
+      desc: "The ads probably weren't the problem. Your tracking was never set up the right way — the algorithm was flying blind from day one.",
     },
     {
-      icon: <IconZap className="w-7 h-7" />,
-      label: 'Market Domination',
-      tag: 'Multi-channel',
-      title: 'Own your market across every platform',
-      points: ['Google + Meta Ads managed together', 'Multi-channel attribution across platforms', 'Retargeting and referral engine', 'Weekly strategy calls with owner'],
-      color: 'slate',
-      timeline: 'For operators ready to scale',
+      num: '03',
+      title: 'Referrals dried up and your phone went quiet.',
+      desc: "Word-of-mouth doesn't scale and you can't turn it on when you need it. Google Ads gives you a lead source you can actually control.",
     },
   ];
-
-  const colorMap = {
-    purple: { bg: 'bg-accent/10', text: 'text-accent', border: 'border-accent/15', tag: 'bg-accent/10 text-accent', check: 'text-accent' },
-    green: { bg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-100', tag: 'bg-emerald-50 text-emerald-600', check: 'text-emerald-500' },
-    slate: { bg: 'bg-brand-950/5', text: 'text-brand-800', border: 'border-brand-950/10', tag: 'bg-brand-950/5 text-brand-800', check: 'text-brand-700' },
-  };
-
   return (
-    <section id="solution" className="bg-white py-20 md:py-28">
-      <div className="max-w-6xl mx-auto px-6">
-        <FadeIn>
-          <div className="max-w-2xl mb-16">
-            <p className="text-accent font-semibold text-sm uppercase tracking-wider mb-3">What I actually fix</p>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-brand-950 leading-tight mb-5">
-              Three layers between you
-              <br />and knowing where your money goes.
-            </h2>
-            <p className="text-slate-600 text-lg leading-relaxed">
-              I install what Google literally tells you to install — but nobody does.
-              Every call, every form fill, every booked job. Tracked, measured, and tied back to the ad that made it happen.
-            </p>
+    <Section id="fit" label="Who this is for">
+      <h2 className="text-2xl md:text-3xl font-bold text-brand-950 leading-tight mb-8">
+        Three signals you're a fit.
+      </h2>
+      <div className="divide-y divide-slate-200">
+        {signals.map((s) => (
+          <div key={s.num} className="py-6 first:pt-0 last:pb-0 grid grid-cols-12 gap-4">
+            <p className="col-span-2 sm:col-span-1 text-slate-400 font-medium">{s.num}</p>
+            <div className="col-span-10 sm:col-span-11">
+              <p className="font-semibold text-brand-950 mb-2">{s.title}</p>
+              <p className="text-slate-600 leading-relaxed">{s.desc}</p>
+            </div>
           </div>
-        </FadeIn>
-
-        <div className="grid lg:grid-cols-3 gap-6">
-          {layers.map((l, i) => {
-            const c = colorMap[l.color];
-            return (
-              <FadeIn key={i} delay={i * 120}>
-                <div className={`bg-white border ${c.border} rounded-2xl p-7 md:p-8 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col h-full`}>
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className={`w-12 h-12 ${c.bg} ${c.text} rounded-xl flex items-center justify-center`}>
-                      {l.icon}
-                    </div>
-                    <div>
-                      <p className="text-brand-950 font-bold text-lg">{l.label}</p>
-                      <span className={`${c.tag} text-xs font-semibold px-2 py-0.5 rounded-full`}>{l.tag}</span>
-                    </div>
-                  </div>
-                  <p className="text-slate-700 font-medium text-base mb-5">{l.title}</p>
-                  <ul className="space-y-3 mb-6 flex-1">
-                    {l.points.map((pt, j) => (
-                      <li key={j} className="flex items-start gap-3 text-slate-600 text-sm">
-                        <IconCheck className={`w-4 h-4 ${c.check} shrink-0 mt-0.5`} />
-                        <span>{pt}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <p className={`${c.text} text-sm font-medium`}>{l.timeline}</p>
-                </div>
-              </FadeIn>
-            );
-          })}
-        </div>
-
-        <FadeIn delay={400}>
-          <p className="text-center text-slate-500 text-sm mt-10">
-            Not sure which fits? The diagnostic call figures that out in 13 minutes.
-          </p>
-        </FadeIn>
+        ))}
       </div>
-    </section>
+    </Section>
   );
 }
 
-/* ─── Math Section ─── */
-
-function MathSection() {
-  const { count: revenue, ref: revRef } = useCountUp(48000, 2000);
-  const { count: roi, ref: roiRef } = useCountUp(53, 1500);
-
+function WhatWeHear() {
   return (
-    <section id="math" className="bg-slate-50 py-20 md:py-28">
-      <div className="max-w-6xl mx-auto px-6">
-        <FadeIn>
-          <div className="max-w-2xl mb-16">
-            <p className="text-accent font-semibold text-sm uppercase tracking-wider mb-3">The math</p>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-brand-950 leading-tight mb-5">
-              Three numbers. That's it.
-            </h2>
-            <p className="text-slate-600 text-lg leading-relaxed">
-              Every month without tracking is another month your budget has zero accountability.
-              Here's what changes when you fix the measurement layer.
-            </p>
-          </div>
-        </FadeIn>
-
-        <div className="grid md:grid-cols-2 gap-6 lg:gap-8 mb-12">
-          <FadeIn delay={100}>
-            <div className="bg-white border-2 border-red-100 rounded-2xl p-8 relative overflow-hidden">
-              <div className="absolute top-0 right-0 bg-red-50 text-danger text-xs font-bold px-4 py-1.5 rounded-bl-xl">
-                WITHOUT TRACKING
-              </div>
-              <div className="mt-6 space-y-5">
-                <div className="flex items-center gap-3">
-                  <IconX className="w-5 h-5 text-danger shrink-0" />
-                  <span className="text-slate-700">Google guesses which clicks matter</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <IconX className="w-5 h-5 text-danger shrink-0" />
-                  <span className="text-slate-700">3.7% conversion rate (industry average)</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <IconX className="w-5 h-5 text-danger shrink-0" />
-                  <span className="text-slate-700">No idea which ad brought which job</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <IconX className="w-5 h-5 text-danger shrink-0" />
-                  <span className="text-slate-700">$228 per lead — highest in home services</span>
-                </div>
-              </div>
-              <div className="mt-8 pt-6 border-t border-red-50">
-                <p className="text-danger font-extrabold text-3xl">Running blind</p>
-                <p className="text-slate-500 text-sm mt-1">Spending money with zero accountability</p>
-              </div>
-            </div>
-          </FadeIn>
-
-          <FadeIn delay={200}>
-            <div className="bg-white border-2 border-emerald-100 rounded-2xl p-8 relative overflow-hidden">
-              <div className="absolute top-0 right-0 bg-emerald-50 text-success text-xs font-bold px-4 py-1.5 rounded-bl-xl">
-                WITH TRACKING
-              </div>
-              <div className="mt-6 space-y-5">
-                <div className="flex items-center gap-3">
-                  <IconCheck className="w-5 h-5 text-success shrink-0" />
-                  <span className="text-slate-700">Google optimizes toward real jobs booked</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <IconCheck className="w-5 h-5 text-success shrink-0" />
-                  <span className="text-slate-700">7-10% conversion rate (nearly 3x)</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <IconCheck className="w-5 h-5 text-success shrink-0" />
-                  <span className="text-slate-700">Every lead tied to the ad that created it</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <IconCheck className="w-5 h-5 text-success shrink-0" />
-                  <span className="text-slate-700">Cost per lead drops as data compounds</span>
-                </div>
-              </div>
-              <div className="mt-8 pt-6 border-t border-emerald-50">
-                <p className="text-success font-extrabold text-3xl">Tracked and proven</p>
-                <p className="text-slate-500 text-sm mt-1">Every dollar accountable, every job attributed</p>
-              </div>
-            </div>
-          </FadeIn>
-        </div>
-
-        <FadeIn delay={300}>
-          <div className="bg-brand-950 rounded-2xl p-8 md:p-12">
-            <p className="text-accent-light font-semibold text-sm uppercase tracking-wider mb-6">Conservative estimate at $3,000/mo ad spend</p>
-            <div className="grid sm:grid-cols-3 gap-8 mb-10">
-              <div className="text-center" ref={revRef}>
-                <p className="text-accent-light text-sm font-medium mb-1">Monthly Revenue</p>
-                <p className="text-white font-extrabold text-4xl md:text-5xl">${revenue > 0 ? revenue.toLocaleString() : '48,000'}</p>
-                <p className="text-slate-400 text-sm mt-1">~4 closed jobs at $12K avg</p>
-              </div>
-              <div className="text-center">
-                <p className="text-accent-light text-sm font-medium mb-1">Total Investment</p>
-                <p className="text-white font-extrabold text-4xl md:text-5xl">$9,000</p>
-                <p className="text-slate-400 text-sm mt-1">$3K ads + $6K management</p>
-              </div>
-              <div className="text-center" ref={roiRef}>
-                <p className="text-accent-light text-sm font-medium mb-1">Return Multiple</p>
-                <p className="text-white font-extrabold text-4xl md:text-5xl">{roi > 0 ? (roi / 10).toFixed(1) : '5.3'}x</p>
-                <p className="text-slate-400 text-sm mt-1">Month one. Conservative.</p>
-              </div>
-            </div>
-            <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
-              <p className="text-slate-400 text-sm">
-                Based on $10.70 avg CPC, 7% CVR, 20% close rate, $12K avg job value. These numbers are conservative.
-              </p>
-              <CTAButton variant="primary-dark" className="shrink-0 text-base px-6 py-3">
-                Run Your Numbers <IconArrowRight className="w-4 h-4" />
-              </CTAButton>
-            </div>
-          </div>
-        </FadeIn>
-      </div>
-    </section>
+    <Section label="What we hear">
+      <p className="text-xl md:text-2xl font-medium text-brand-950 leading-snug">
+        Most operators we talk to have been told their tracking is fine for two years. It isn't. When we show them what Google actually sees, it's almost always the same picture — half the conversions invisible, the rest mis-attributed.
+      </p>
+    </Section>
   );
 }
 
-/* ─── Process Section ─── */
-
-function Process() {
-  const steps = [
-    { num: '01', title: 'Book the call', desc: "13 minutes. I share my screen and show you what I'm seeing on your site. If your tracking is clean, I'll tell you. No pitch. No pressure.", icon: <IconCalendar className="w-6 h-6" /> },
-    { num: '02', title: "I show you what's broken", desc: "Live on your site, in plain language. You'll see exactly where your data drops off and what Google can't see. Most owners are shocked at what's missing.", icon: <IconSignalSlash className="w-6 h-6" /> },
-    { num: '03', title: 'We fix it', desc: "5 business days from signed to verified. Tracking installed, tested with live traffic, and delivered with a written proof-of-work report. Then your ads can actually learn.", icon: <IconCheck className="w-6 h-6" /> },
-  ];
-
+function AboutRebootMedia() {
   return (
-    <section id="process" className="bg-white py-20 md:py-28">
-      <div className="max-w-6xl mx-auto px-6">
-        <FadeIn>
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <p className="text-accent font-semibold text-sm uppercase tracking-wider mb-3">How it works</p>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-brand-950 leading-tight mb-5">
-              Three steps. Zero risk.
-            </h2>
-            <p className="text-slate-600 text-lg leading-relaxed">
-              If your tracking is already clean, I'll tell you in 13 minutes and you lose nothing.
-              If it's broken, I'll show you exactly where — and you decide what to do next.
-            </p>
-          </div>
-        </FadeIn>
-
-        <div className="grid md:grid-cols-3 gap-8">
-          {steps.map((s, i) => (
-            <FadeIn key={i} delay={i * 150}>
-              <div className="relative">
-                <div className="bg-slate-50 rounded-2xl p-8 border border-slate-100 hover:shadow-md transition-shadow duration-300 h-full">
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="w-12 h-12 bg-accent/10 text-accent rounded-xl flex items-center justify-center">
-                      {s.icon}
-                    </div>
-                    <span className="text-accent font-extrabold text-2xl">{s.num}</span>
-                  </div>
-                  <h3 className="text-xl font-bold text-brand-950 mb-3">{s.title}</h3>
-                  <p className="text-slate-600 leading-relaxed">{s.desc}</p>
-                </div>
-              </div>
-            </FadeIn>
-          ))}
-        </div>
-
-        <FadeIn delay={500}>
-          <div className="text-center mt-14">
-            <CTAButton>
-              See What's Broken — Free, 13 Minutes
-              <IconArrowRight className="w-5 h-5" />
-            </CTAButton>
-          </div>
-        </FadeIn>
+    <Section id="about" label="About Reboot Media">
+      <h2 className="text-2xl md:text-3xl font-bold text-brand-950 leading-tight mb-5">
+        A Google Ads agency built for roofing.
+      </h2>
+      <div className="space-y-4 text-slate-700 leading-relaxed max-w-2xl">
+        <p>
+          Reboot Media is a focused Google Ads agency for roofing companies. Our team combines systems engineering and home services backgrounds — disciplines that taught us why measurement has to come before media spend.
+        </p>
+        <p>
+          We do one thing: install the tracking infrastructure, then run the campaigns on top of it. Reboot Media LLC, based in Austin, TX.
+        </p>
+        <p>
+          <a href="https://www.linkedin.com/company/rebootmedia-io/" target="_blank" rel="noopener noreferrer" className="text-accent hover:text-accent-dark font-semibold underline-offset-4 hover:underline">
+            Reboot Media on LinkedIn →
+          </a>
+        </p>
       </div>
-    </section>
+    </Section>
   );
 }
 
-/* ─── About Section ─── */
-
-function About() {
+function NextStep() {
   return (
-    <section id="about" className="bg-slate-50 py-20 md:py-28">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="max-w-3xl">
-          <FadeIn>
-            <p className="text-accent font-semibold text-sm uppercase tracking-wider mb-3">Who's behind this</p>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-brand-950 leading-tight mb-6">
-              Not a marketing agency.
-              <br />A systems engineer who fixes measurement.
-            </h2>
-          </FadeIn>
-          <FadeIn delay={100}>
-            <div className="space-y-4 text-slate-600 leading-relaxed text-lg">
-              <p>
-                I'm Kendall Reid. I spent years in real estate, working alongside roofers, contractors, and home services operators every day. I saw the same problem over and over — talented roofers spending thousands on Google Ads with no idea which dollars were actually bringing in jobs. The tracking was always broken, and nobody was fixing it.
-              </p>
-              <p>
-                My background is in systems engineering and data modeling — most recently at Oracle. I built systems where data has to be right or the whole thing breaks. Now I apply that same discipline to the one thing most roofing companies get wrong: measurement.
-              </p>
-              <p>
-                I don't do social media. I don't do branding. I don't do content calendars.
-                I fix the measurement infrastructure that makes paid advertising actually work.
-                One niche. One thing. Done right.
-              </p>
-            </div>
-          </FadeIn>
-
-          <FadeIn delay={200}>
-            <div className="mt-8 flex flex-wrap gap-4">
-              <div className="bg-white border border-slate-200 rounded-xl px-5 py-3 shadow-sm">
-                <p className="text-brand-950 font-bold text-sm">Real Estate Background</p>
-                <p className="text-slate-500 text-xs">Saw the problem firsthand</p>
-              </div>
-              <div className="bg-white border border-slate-200 rounded-xl px-5 py-3 shadow-sm">
-                <p className="text-brand-950 font-bold text-sm">Systems Engineering</p>
-                <p className="text-slate-500 text-xs">Oracle background</p>
-              </div>
-              <div className="bg-white border border-slate-200 rounded-xl px-5 py-3 shadow-sm">
-                <p className="text-brand-950 font-bold text-sm">Roofing Only</p>
-                <p className="text-slate-500 text-xs">Single niche, deep expertise</p>
-              </div>
-              <div className="bg-white border border-slate-200 rounded-xl px-5 py-3 shadow-sm">
-                <p className="text-brand-950 font-bold text-sm">Austin, TX</p>
-                <p className="text-slate-500 text-xs">Reboot Media LLC</p>
-              </div>
-            </div>
-          </FadeIn>
-        </div>
-      </div>
-    </section>
+    <Section label="Next step">
+      <h2 className="text-2xl md:text-3xl font-bold text-brand-950 leading-tight mb-5">
+        One 15-minute call. We tell you what's broken — or that nothing is.
+      </h2>
+      <p className="text-slate-700 leading-relaxed mb-8 max-w-2xl">
+        No pitch. No pressure. If we can't help, we tell you and refer you out. The diagnostic is free.
+      </p>
+      <CTAButton>
+        Book your diagnostic <IconArrowRight className="w-4 h-4" />
+      </CTAButton>
+    </Section>
   );
 }
-
-/* ─── Final CTA ─── */
-
-function FinalCTA() {
-  return (
-    <section className="bg-brand-950 py-20 md:py-28 relative overflow-hidden">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent/5 rounded-full blur-[150px]" />
-
-      <div className="max-w-3xl mx-auto px-6 text-center relative">
-        <FadeIn>
-          <p className="text-accent-light font-semibold text-sm uppercase tracking-wider mb-4">Stop running blind</p>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white leading-tight mb-6">
-            Your ads didn't fail.
-            <br />Your tracking did.
-          </h2>
-          <p className="text-slate-400 text-lg leading-relaxed mb-10 max-w-xl mx-auto">
-            Find out in 13 minutes. I'll share my screen, show you what Google can and can't see on your site,
-            and you'll know exactly where your money is going. If everything's clean, I'll tell you.
-          </p>
-
-          <CTAButton variant="primary-dark" className="text-xl px-10 py-5">
-            Book Your Free Diagnostic
-            <IconArrowRight className="w-5 h-5" />
-          </CTAButton>
-
-          <p className="text-slate-500 text-sm mt-6">
-            13 minutes. No pitch. No pressure. Just data.
-          </p>
-        </FadeIn>
-      </div>
-    </section>
-  );
-}
-
-/* ─── Footer ─── */
 
 function Footer() {
   return (
-    <footer className="bg-white border-t border-slate-100 py-12">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-2.5">
-            <Logo className="w-8 h-8" />
-            <span className="text-brand-950 font-bold text-lg tracking-tight">
-              Reboot<span className="text-accent">Media</span>
-            </span>
-          </div>
-          <div className="flex items-center gap-6">
-            <a href="mailto:k.reid@rebootmedia.us" className="text-slate-500 hover:text-brand-950 transition-colors flex items-center gap-2 text-sm">
-              <IconMail className="w-4 h-4" />
-              k.reid@rebootmedia.us
-            </a>
-            <a href="https://www.linkedin.com/company/rebootmedia-io/" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-brand-950 transition-colors" aria-label="LinkedIn">
-              <IconLinkedIn className="w-5 h-5" />
-            </a>
-          </div>
-        </div>
-        <div className="mt-8 pt-6 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-3 text-slate-400 text-xs">
-          <p>&copy; 2026 Reboot Media LLC. Austin, Texas.</p>
-          <p>Google Ads tracking infrastructure for roofing companies.</p>
-        </div>
+    <footer className="border-t border-slate-200">
+      <div className="max-w-5xl mx-auto px-6 py-8 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm text-slate-500">
+        <p>Reboot Media LLC · Austin, TX</p>
+        <p className="sm:text-center">
+          <a href="mailto:hello@rebootmedia.us" className="hover:text-brand-950 transition-colors">
+            hello@rebootmedia.us
+          </a>
+        </p>
+        <p className="sm:text-right flex sm:justify-end items-center gap-4">
+          <a href="https://www.linkedin.com/company/rebootmedia-io/" target="_blank" rel="noopener noreferrer" className="hover:text-brand-950 transition-colors inline-flex items-center" aria-label="Reboot Media on LinkedIn">
+            <IconLinkedIn className="w-4 h-4" />
+          </a>
+          <span>© 2026</span>
+        </p>
       </div>
     </footer>
   );
 }
 
-/* ─── App ─── */
-
 export default function App() {
   return (
-    <div className="font-sans antialiased bg-white">
+    <div className="font-sans antialiased bg-white text-brand-950 min-h-screen">
       <Nav />
       <Hero />
-      <Problem />
-      <Solution />
-      <MathSection />
-      <Process />
-      <About />
-      <FinalCTA />
+      <Approach />
+      <WhatWeInstall />
+      <Focus />
+      <Fit />
+      <WhatWeHear />
+      <AboutRebootMedia />
+      <NextStep />
       <Footer />
     </div>
   );
