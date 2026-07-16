@@ -6,22 +6,25 @@
 //   can dedupe against these browser-side events.
 // - postLead() forwards the raw lead payload to a Zapier webhook.
 //
-// All three network-touching functions no-op gracefully when their
-// required env var is unset (dev, or before the vars are configured in
-// the Cloudflare Pages dashboard) — none of them may throw or block render.
+// initPixel() falls back to the committed production pixel ID when
+// VITE_META_PIXEL_ID is unset; postLead() no-ops gracefully when its
+// required env var (VITE_ZAPIER_WEBHOOK_URL) is unset (dev, or before
+// it's configured in the Cloudflare Pages dashboard) — neither may
+// throw or block render.
 
 let pixelInitialized = false
 
 /**
  * Load the Meta Pixel base code and fire an initial PageView.
  * Safe to call multiple times — only initializes once.
- * No-ops silently if VITE_META_PIXEL_ID is not set.
+ * Falls back to the committed default production pixel ID if
+ * VITE_META_PIXEL_ID is not set; the env var can still override it.
  */
 export function initPixel() {
   if (pixelInitialized) return
   if (typeof window === 'undefined') return
 
-  const pixelId = import.meta.env.VITE_META_PIXEL_ID
+  const pixelId = import.meta.env.VITE_META_PIXEL_ID || '570732940097001'
   if (!pixelId) return
 
   try {
