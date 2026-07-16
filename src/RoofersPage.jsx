@@ -3,7 +3,7 @@ import PreQualForm from './roofers/PreQualForm.jsx'
 import { initPixel, captureAttribution } from './roofers/tracking.js'
 
 function Logo({ className = 'w-7 h-7' }) {
-  return <img src="/logo.png" alt="" className={className} />
+  return <img src="/logo.svg" alt="" className={className} />
 }
 
 function BrandMark() {
@@ -202,13 +202,15 @@ export default function RoofersPage() {
   return (
     <div className="min-h-screen bg-roof-paper font-sans text-roof-ink antialiased">
       <BrandMark />
-      <Hero />
-      <Problem />
-      <WhatWeBuild />
-      <Unlock />
-      <Guarantee />
-      <HowItWorks />
-      <ScarcityAndForm />
+      <main>
+        <Hero />
+        <Problem />
+        <WhatWeBuild />
+        <Unlock />
+        <Guarantee />
+        <HowItWorks />
+        <ScarcityAndForm />
+      </main>
       <Footer />
     </div>
   )
