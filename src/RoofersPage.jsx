@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import PreQualForm from './roofers/PreQualForm.jsx'
-import { initPixel } from './roofers/tracking.js'
+import { initPixel, captureAttribution } from './roofers/tracking.js'
 
 function Logo({ className = 'w-7 h-7' }) {
   return <img src="/logo.png" alt="" className={className} />
@@ -186,6 +186,7 @@ function Footer() {
 export default function RoofersPage() {
   useEffect(() => {
     initPixel()
+    captureAttribution()
   }, [])
 
   return (

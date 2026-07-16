@@ -1,5 +1,5 @@
 import { useState, lazy, Suspense } from 'react'
-import { newEventId, trackLead, postLead } from './tracking'
+import { newEventId, trackLead, postLead, getAttribution } from './tracking'
 
 // react-calendly is only ever pulled in through this lazy boundary, and
 // only once a prospect has qualified — protects LCP on initial paint.
@@ -18,6 +18,11 @@ const initialFields = {
   googleAdsStatus: '',
   adSpend: '',
   drivingFactor: '',
+  // Honeypot — real users never see or fill this field (offscreen +
+  // aria-hidden + unreachable by Tab). A filled value marks the submit
+  // as bot traffic so we can soft-DQ it without polluting Meta's Lead
+  // signal or the Zapier webhook.
+  website: '',
 }
 
 function TextField({ id, label, type = 'text', value, onChange, error, hint, autoComplete }) {
@@ -226,6 +231,10 @@ export default function PreQualForm() {
   function handleSubmitStep(e) {
     e.preventDefault()
 
+    // Guard against a double-click firing two final submits (two Lead
+    // events / two webhook POSTs).
+    if (submitted) return
+
     const stepErrors = step === 1 ? validateStep1() : validateStep2()
     if (Object.keys(stepErrors).length > 0) {
       setErrors(stepErrors)
@@ -237,6 +246,19 @@ export default function PreQualForm() {
     if (step === 1) {
       setStep(2)
       setLiveMessage('Step 2 of 3: A few questions.')
+      return
+    }
+
+    // Honeypot tripped: a bot filled the offscreen "website" field. Fire
+    // NOTHING — no trackLead, no postLead — and route to the same
+    // soft-DQ nurture branch a genuinely unqualified human would see, so
+    // the bot gets a plausible-looking success and Meta's Lead signal
+    // stays clean.
+    if (fields.website.trim()) {
+      setQualified(false)
+      setSubmitted(true)
+      setStep(3)
+      setLiveMessage("We might not be the right fit yet — here's how to get ready.")
       return
     }
 
@@ -259,6 +281,7 @@ export default function PreQualForm() {
       tags,
       qualified: isQualified,
       page: 'roofers',
+      attribution: getAttribution(),
     })
 
     setQualified(isQualified)
@@ -326,6 +349,23 @@ export default function PreQualForm() {
                 error={errors.phone}
                 autoComplete="tel"
               />
+              {/* Honeypot — offscreen and unreachable by keyboard/screen reader.
+                  Real users never see or fill this; a filled value marks the
+                  submit as bot traffic (handled in handleSubmitStep). */}
+              <div
+                style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' }}
+                aria-hidden="true"
+              >
+                <input
+                  type="text"
+                  name="website"
+                  autoComplete="off"
+                  tabIndex={-1}
+                  aria-hidden="true"
+                  value={fields.website}
+                  onChange={(e) => update('website', e.target.value)}
+                />
+              </div>
               <button
                 type="submit"
                 className="min-h-[48px] w-full rounded-lg bg-accent px-6 py-3 text-[17px] font-semibold text-white transition-colors hover:bg-accent-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"

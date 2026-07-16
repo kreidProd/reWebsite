@@ -1,6 +1,8 @@
 // Tracking utilities for the /roofers ad-destination landing page.
 //
 // - initPixel() loads the Meta Pixel and fires PageView.
+// - captureAttribution() / getAttribution() capture and surface which
+//   ad (UTM + fbclid + fbp/fbc) produced the lead.
 // - trackLead() / trackSchedule() fire Meta standard events with a
 //   client-generated event_id so a future server-side CAPI integration
 //   can dedupe against these browser-side events.
@@ -13,6 +15,96 @@
 // throw or block render.
 
 let pixelInitialized = false
+
+const ATTRIBUTION_STORAGE_KEY = 'roofers_attribution'
+const ATTRIBUTION_URL_KEYS = [
+  'utm_source',
+  'utm_medium',
+  'utm_campaign',
+  'utm_content',
+  'utm_term',
+  'fbclid',
+]
+
+function readCookie(name) {
+  try {
+    if (typeof document === 'undefined') return undefined
+    const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`))
+    return match ? decodeURIComponent(match[1]) : undefined
+  } catch (err) {
+    return undefined
+  }
+}
+
+/**
+ * Read utm_source/utm_medium/utm_campaign/utm_content/utm_term/fbclid off
+ * the current URL and, if any are present, persist them to sessionStorage
+ * (overwriting whatever was there). If none are present, leave any
+ * previously-captured attribution untouched — this lets a mid-funnel
+ * reload that drops the query string still get credit for the original
+ * ad click. Best-effort only: storage failures (e.g. Safari private
+ * mode) must never break the page.
+ */
+export function captureAttribution() {
+  if (typeof window === 'undefined') return
+
+  try {
+    const params = new URLSearchParams(window.location.search)
+    const captured = {}
+    for (const key of ATTRIBUTION_URL_KEYS) {
+      const value = params.get(key)
+      if (value) captured[key] = value
+    }
+
+    if (Object.keys(captured).length > 0) {
+      sessionStorage.setItem(ATTRIBUTION_STORAGE_KEY, JSON.stringify(captured))
+    }
+  } catch (err) {
+    // Best-effort — never let attribution capture break the page.
+    console.error('[tracking] captureAttribution failed', err)
+  }
+}
+
+/**
+ * Return the best-known attribution for this session: the captured
+ * UTM/fbclid values, Meta's own click/browser identifiers (_fbc/_fbp
+ * cookies), and basic landing-page context. Keys with no value are
+ * omitted so the payload stays clean. Never throws.
+ */
+export function getAttribution() {
+  const attribution = {}
+
+  try {
+    const stored = sessionStorage.getItem(ATTRIBUTION_STORAGE_KEY)
+    if (stored) {
+      Object.assign(attribution, JSON.parse(stored))
+    }
+  } catch (err) {
+    console.error('[tracking] getAttribution read failed', err)
+  }
+
+  try {
+    const fbp = readCookie('_fbp')
+    if (fbp) attribution.fbp = fbp
+    const fbc = readCookie('_fbc')
+    if (fbc) attribution.fbc = fbc
+  } catch (err) {
+    console.error('[tracking] getAttribution cookie read failed', err)
+  }
+
+  try {
+    if (typeof window !== 'undefined') {
+      attribution.landing_page = window.location.pathname
+    }
+    if (typeof document !== 'undefined' && document.referrer) {
+      attribution.referrer = document.referrer
+    }
+  } catch (err) {
+    console.error('[tracking] getAttribution context read failed', err)
+  }
+
+  return attribution
+}
 
 /**
  * Load the Meta Pixel base code and fire an initial PageView.
