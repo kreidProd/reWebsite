@@ -4,15 +4,18 @@
 // - captureAttribution() / getAttribution() capture and surface which
 //   ad (UTM + fbclid + fbp/fbc) produced the lead.
 // - trackLead() / trackSchedule() fire Meta standard events with a
-//   client-generated event_id so a future server-side CAPI integration
-//   can dedupe against these browser-side events.
-// - postLead() forwards the raw lead payload to a Zapier webhook.
+//   client-generated event_id so the server-side Meta Conversions API
+//   call made by functions/api/lead.js can dedupe against these
+//   browser-side events (same event_id on both sides).
+// - postLead() forwards the raw lead payload to the same-origin
+//   /api/lead endpoint (a Cloudflare Pages Function), which fires the
+//   server-side CAPI event and forwards to Zapier — no webhook URL or
+//   token is ever exposed to the browser.
 //
 // initPixel() falls back to the committed production pixel ID when
-// VITE_META_PIXEL_ID is unset; postLead() no-ops gracefully when its
-// required env var (VITE_ZAPIER_WEBHOOK_URL) is unset (dev, or before
-// it's configured in the Cloudflare Pages dashboard) — neither may
-// throw or block render.
+// VITE_META_PIXEL_ID is unset; postLead() swallows all errors (in
+// `vite dev` there is no Pages Functions runtime, so /api/lead 404s —
+// that must stay silent) — neither may throw or block render.
 
 let pixelInitialized = false
 
@@ -186,19 +189,20 @@ export function trackSchedule(eventId) {
 }
 
 /**
- * Fire-and-forget POST of the lead payload to the Zapier webhook.
- * No-ops if VITE_ZAPIER_WEBHOOK_URL is unset. Never throws, never
- * blocks the UI — a webhook failure must not break the booking flow.
+ * Fire-and-forget POST of the lead payload to the same-origin /api/lead
+ * endpoint (a Cloudflare Pages Function — see functions/api/lead.js),
+ * which fires the server-side Meta CAPI event and forwards to Zapier.
+ * Never throws, never blocks the UI — a failure here (including the
+ * expected 404 under `vite dev`, which has no Functions runtime) must
+ * not break the booking flow.
  */
 export function postLead(payload) {
-  const webhookUrl = import.meta.env.VITE_ZAPIER_WEBHOOK_URL
-  if (!webhookUrl) return
-
   try {
-    fetch(webhookUrl, {
+    fetch('/api/lead', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
+      keepalive: true,
     }).catch((err) => {
       console.error('[tracking] postLead network error', err)
     })
