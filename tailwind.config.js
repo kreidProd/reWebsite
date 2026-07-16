@@ -2,6 +2,7 @@
 export default {
   content: [
     "./index.html",
+    "./roofers.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
@@ -23,6 +24,15 @@ export default {
         },
         success: '#27A244',
         danger: '#C0392B',
+        roof: {
+          paper:           '#FAF9FC',
+          surface:         '#FFFFFF',
+          ink:             '#1A1626',
+          muted:           '#5E5A6E',
+          'ink-muted':     '#A8A3B8',
+          'border-subtle': '#E9E7F0',
+          'border-strong': '#8A85A0',
+        },
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
