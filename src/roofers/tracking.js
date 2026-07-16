@@ -24,7 +24,7 @@ export function initPixel() {
   if (pixelInitialized) return
   if (typeof window === 'undefined') return
 
-  const pixelId = import.meta.env.VITE_META_PIXEL_ID || '570732940097001'
+  const pixelId = import.meta.env.VITE_META_PIXEL_ID || '943826127904095'
   if (!pixelId) return
 
   try {
