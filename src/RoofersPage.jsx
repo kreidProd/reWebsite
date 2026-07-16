@@ -176,7 +176,17 @@ function Footer() {
   return (
     <footer className="border-t border-roof-border-subtle bg-roof-paper">
       <div className="mx-auto flex max-w-2xl flex-col items-center gap-6 px-6 py-14 text-center md:py-16">
-        <p className="text-sm text-roof-muted">Reboot Media LLC · Austin, TX</p>
+        <p className="text-sm text-roof-muted">
+          Reboot Media LLC · Austin, TX ·{' '}
+          <a
+            href="/privacy"
+            target="_blank"
+            rel="noopener"
+            className="text-roof-muted underline decoration-roof-border-strong/40 underline-offset-2 hover:text-roof-ink"
+          >
+            Privacy
+          </a>
+        </p>
         <PrimaryCTA />
       </div>
     </footer>
