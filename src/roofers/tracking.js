@@ -7,10 +7,11 @@
 //   client-generated event_id so the server-side Meta Conversions API
 //   call made by functions/api/lead.js can dedupe against these
 //   browser-side events (same event_id on both sides).
-// - postLead() forwards the raw lead payload to the same-origin
-//   /api/lead endpoint (a Cloudflare Pages Function), which fires the
-//   server-side CAPI event and forwards to Zapier — no webhook URL or
-//   token is ever exposed to the browser.
+// - postLead() / postSchedule() forward the lead/booking payload to the
+//   same-origin /api/lead endpoint (a Cloudflare Pages Function), which
+//   fires the server-side CAPI event (Lead or Schedule, per event_name)
+//   and forwards to Zapier — no webhook URL or token is ever exposed to
+//   the browser.
 //
 // initPixel() falls back to the committed production pixel ID when
 // VITE_META_PIXEL_ID is unset; postLead() swallows all errors (in
@@ -189,14 +190,13 @@ export function trackSchedule(eventId) {
 }
 
 /**
- * Fire-and-forget POST of the lead payload to the same-origin /api/lead
- * endpoint (a Cloudflare Pages Function — see functions/api/lead.js),
- * which fires the server-side Meta CAPI event and forwards to Zapier.
- * Never throws, never blocks the UI — a failure here (including the
- * expected 404 under `vite dev`, which has no Functions runtime) must
- * not break the booking flow.
+ * Shared fire-and-forget POST to the same-origin /api/lead endpoint (a
+ * Cloudflare Pages Function — see functions/api/lead.js), which fires the
+ * server-side Meta CAPI event and forwards to Zapier. Never throws, never
+ * blocks the UI — a failure here (including the expected 404 under
+ * `vite dev`, which has no Functions runtime) must not break the flow.
  */
-export function postLead(payload) {
+function postToLeadEndpoint(payload, label) {
   try {
     fetch('/api/lead', {
       method: 'POST',
@@ -204,9 +204,28 @@ export function postLead(payload) {
       body: JSON.stringify(payload),
       keepalive: true,
     }).catch((err) => {
-      console.error('[tracking] postLead network error', err)
+      console.error(`[tracking] ${label} network error`, err)
     })
   } catch (err) {
-    console.error('[tracking] postLead failed', err)
+    console.error(`[tracking] ${label} failed`, err)
   }
+}
+
+/**
+ * Fire-and-forget POST of the lead payload to /api/lead. See
+ * postToLeadEndpoint() for the shared fire-and-forget semantics.
+ */
+export function postLead(payload) {
+  postToLeadEndpoint(payload, 'postLead')
+}
+
+/**
+ * Fire-and-forget POST of the Calendly booking payload to /api/lead
+ * (event_name: 'Schedule'), so the server-side CAPI "Schedule" event and
+ * Zapier forward see it as a booking notification. Same fire-and-forget,
+ * same-origin, keepalive semantics as postLead() — see
+ * postToLeadEndpoint().
+ */
+export function postSchedule(payload) {
+  postToLeadEndpoint(payload, 'postSchedule')
 }

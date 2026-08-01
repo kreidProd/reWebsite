@@ -1,14 +1,18 @@
 // Cloudflare Pages Function — POST /api/lead
 //
-// Same-origin endpoint the /roofers pre-qual form posts to instead of
-// hitting a client-visible webhook URL directly. On each submit it:
+// Same-origin endpoint the /roofers pre-qual form AND the Calendly booking
+// step post to instead of hitting a client-visible webhook URL directly.
+// On each submit it:
 //
-//   1. Fires the Meta Conversions API (CAPI) "Lead" event server-side —
-//      only for qualified leads — using the SAME event_id the browser
-//      pixel used, so Meta dedupes the browser + server events into one.
-//   2. Forwards the full lead payload to Zapier (both Qualified and
-//      Nurture leads), server-side, so the webhook URL never ships in
-//      the public JS bundle.
+//   1. Fires the Meta Conversions API (CAPI) "Lead" or "Schedule" event
+//      server-side — for qualified leads and for every booking — using the
+//      SAME event_id the browser pixel used, so Meta dedupes the browser +
+//      server events into one. payload.event_name (validated against an
+//      allowlist, defaulting to 'Lead') picks which standard event fires.
+//   2. Forwards the full payload to Zapier (Qualified/Nurture leads and
+//      bookings alike), server-side, so the webhook URL never ships in the
+//      public JS bundle. event_name always rides along so the Zap can
+//      branch on it.
 //
 // All secrets (META_CAPI_TOKEN, META_DATASET_ID, META_TEST_EVENT_CODE,
 // ZAPIER_WEBHOOK_URL) are read from context.env — set them in the
@@ -18,6 +22,22 @@
 
 const DEFAULT_DATASET_ID = '943826127904095'
 const CAPI_VERSION = 'v21.0'
+
+// Meta standard events this endpoint is allowed to fire server-side.
+// Anything else supplied by the client falls back to 'Lead' — client
+// input must never be passed straight into the CAPI event name.
+const ALLOWED_EVENT_NAMES = ['Lead', 'Schedule']
+const CONTENT_NAME_BY_EVENT = {
+  Lead: 'roofer_prequal',
+  Schedule: 'roofer_booking',
+}
+
+/**
+ * Validate payload.event_name against the allowlist, defaulting to 'Lead'.
+ */
+function resolveEventName(payload) {
+  return ALLOWED_EVENT_NAMES.includes(payload.event_name) ? payload.event_name : 'Lead'
+}
 
 /**
  * Trim + lowercase an email address per Meta's CAPI hashing spec.
@@ -50,9 +70,10 @@ export async function sha256hex(input) {
 }
 
 /**
- * Build and send the Meta Conversions API "Lead" event for a qualified
- * lead. Never throws — logs and resolves on failure so it can safely
- * run inside Promise.allSettled without surfacing an unhandled path.
+ * Build and send the Meta Conversions API "Lead" or "Schedule" event
+ * (per payload.event_name, validated against the allowlist). Never
+ * throws — logs and resolves on failure so it can safely run inside
+ * Promise.allSettled without surfacing an unhandled path.
  */
 async function sendCapiEvent(payload, context) {
   const { env, request } = context
@@ -64,6 +85,7 @@ async function sendCapiEvent(payload, context) {
 
   const datasetId = env.META_DATASET_ID || DEFAULT_DATASET_ID
   const attribution = payload.attribution || {}
+  const eventName = resolveEventName(payload)
 
   const userData = {
     em: [await sha256hex(normalizeEmail(payload.email))],
@@ -77,13 +99,13 @@ async function sendCapiEvent(payload, context) {
   const body = {
     data: [
       {
-        event_name: 'Lead',
+        event_name: eventName,
         event_time: Math.floor(Date.now() / 1000),
         event_id: payload.event_id,
         action_source: 'website',
         event_source_url: `https://rebootmedia.us${attribution.landing_page || '/roofers'}`,
         user_data: userData,
-        custom_data: { content_name: 'roofer_prequal' },
+        custom_data: { content_name: CONTENT_NAME_BY_EVENT[eventName] },
       },
     ],
     access_token: token,
@@ -107,18 +129,23 @@ async function sendCapiEvent(payload, context) {
 }
 
 /**
- * Forward the raw lead payload to Zapier, unchanged. Skips silently if
- * ZAPIER_WEBHOOK_URL isn't configured. Never throws.
+ * Forward the payload to Zapier, with event_name normalized so the Zap
+ * can branch on Lead vs Schedule. Skips silently if ZAPIER_WEBHOOK_URL
+ * isn't configured. Never throws.
  */
 async function forwardToZapier(payload, context) {
   const webhookUrl = context.env.ZAPIER_WEBHOOK_URL
   if (!webhookUrl) return
 
+  // Forward the payload as-is, but make sure event_name is always present
+  // and validated so the Zap can branch on Lead vs Schedule.
+  const forwardPayload = { ...payload, event_name: resolveEventName(payload) }
+
   try {
     const res = await fetch(webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(forwardPayload),
     })
 
     if (!res.ok) {
@@ -149,7 +176,7 @@ export async function onRequestPost(context) {
   }
 
   const tasks = []
-  if (payload.qualified === true) {
+  if (payload.qualified === true || resolveEventName(payload) === 'Schedule') {
     tasks.push(sendCapiEvent(payload, context))
   }
   tasks.push(forwardToZapier(payload, context))

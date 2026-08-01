@@ -4,7 +4,7 @@
 // dependency chain) ships as its own chunk, fetched only once a
 // prospect has qualified — never during the initial page paint.
 import { InlineWidget, useCalendlyEventListener } from 'react-calendly'
-import { newEventId, trackSchedule, getAttribution } from './tracking'
+import { newEventId, trackSchedule, postSchedule, getAttribution } from './tracking'
 
 const DEFAULT_CALENDLY_URL = 'https://calendly.com/hello-rebootmedia/diagnostic'
 
@@ -30,7 +30,21 @@ function buildCalendlyUtm(attribution) {
 export default function CalendlyEmbed({ name, email, phone, onScheduled }) {
   useCalendlyEventListener({
     onEventScheduled: () => {
-      trackSchedule(newEventId())
+      // Generate the event id ONCE and reuse it for both the browser pixel
+      // and the server-side CAPI post so Meta dedupes them into one event.
+      const eventId = newEventId()
+      trackSchedule(eventId)
+      postSchedule({
+        event_id: eventId,
+        event_name: 'Schedule',
+        fullName: name,
+        email,
+        phone,
+        page: 'roofers',
+        tags: ['Booked'],
+        qualified: true,
+        attribution: getAttribution(),
+      })
       onScheduled?.()
     },
   })
