@@ -451,6 +451,7 @@ export default function PreQualForm() {
                     name={fields.fullName}
                     email={fields.email}
                     phone={fields.phone}
+                    company={fields.company}
                     onScheduled={() => setBooked(true)}
                   />
                 </Suspense>
