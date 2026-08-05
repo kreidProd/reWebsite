@@ -9,10 +9,13 @@
 //      SAME event_id the browser pixel used, so Meta dedupes the browser +
 //      server events into one. payload.event_name (validated against an
 //      allowlist, defaulting to 'Lead') picks which standard event fires.
-//   2. Forwards the full payload to Zapier (Qualified/Nurture leads and
-//      bookings alike), server-side, so the webhook URL never ships in the
-//      public JS bundle. event_name always rides along so the Zap can
-//      branch on it.
+//   2. Forwards Lead payloads (Qualified and Nurture alike) to the CRM
+//      webhook server-side, so the webhook URL never ships in the public
+//      JS bundle. Schedule payloads are NOT forwarded — bookings reach the
+//      CRM through the Calendly → GHL webhook subscription (Workflow #2),
+//      and forwarding them here re-runs Workflow #1's Create contact with
+//      a payload that lacks the qualifier keys, wiping those fields on
+//      the contact.
 //
 // All secrets (META_CAPI_TOKEN, META_DATASET_ID, META_TEST_EVENT_CODE,
 // ZAPIER_WEBHOOK_URL) are read from context.env — set them in the
@@ -129,17 +132,21 @@ async function sendCapiEvent(payload, context) {
 }
 
 /**
- * Forward the payload to Zapier, with event_name normalized so the Zap
- * can branch on Lead vs Schedule. Skips silently if ZAPIER_WEBHOOK_URL
- * isn't configured. Never throws.
+ * Forward Lead payloads to the CRM inbound webhook, unchanged except for
+ * a normalized event_name. Schedule payloads are deliberately NOT
+ * forwarded: bookings reach the CRM via the Calendly → GHL webhook
+ * subscription (Workflow #2), and a Schedule payload re-running
+ * Workflow #1's Create contact wipes the qualifier fields it lacks.
+ * Skips silently if ZAPIER_WEBHOOK_URL isn't configured. Never throws.
  */
 async function forwardToZapier(payload, context) {
   const webhookUrl = context.env.ZAPIER_WEBHOOK_URL
   if (!webhookUrl) return
 
-  // Forward the payload as-is, but make sure event_name is always present
-  // and validated so the Zap can branch on Lead vs Schedule.
-  const forwardPayload = { ...payload, event_name: resolveEventName(payload) }
+  const eventName = resolveEventName(payload)
+  if (eventName !== 'Lead') return
+
+  const forwardPayload = { ...payload, event_name: eventName }
 
   try {
     const res = await fetch(webhookUrl, {
