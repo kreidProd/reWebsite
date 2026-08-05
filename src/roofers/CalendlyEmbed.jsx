@@ -27,7 +27,7 @@ function buildCalendlyUtm(attribution) {
   return utm
 }
 
-export default function CalendlyEmbed({ name, email, phone, onScheduled }) {
+export default function CalendlyEmbed({ name, email, phone, company, onScheduled }) {
   useCalendlyEventListener({
     onEventScheduled: () => {
       // Generate the event id ONCE and reuse it for both the browser pixel
@@ -60,7 +60,14 @@ export default function CalendlyEmbed({ name, email, phone, onScheduled }) {
         prefill={{
           name,
           email,
-          customAnswers: { a1: phone },
+          // customAnswers.a1 maps to Calendly's FIRST custom question on the
+          // hello-rebootmedia/diagnostic event, which is "Company Name" (question
+          // 2 is "Any questions?" — there is no phone question). This mapping is
+          // positional, not named, so it silently breaks if anyone reorders,
+          // deletes, or adds questions in the Calendly dashboard. If prefill
+          // starts landing in the wrong field, check the event's question order
+          // in Calendly before touching this code.
+          customAnswers: { a1: company },
         }}
         utm={utm}
       />
