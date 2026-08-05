@@ -8,7 +8,7 @@ Owner: Kendall. This is the checklist for taking the `/roofers` ad-destination p
 2. Visitor completes the 3-step pre-qual form (`src/roofers/PreQualForm.jsx`).
 3. **Qualified** lead (decision-maker + ad spend ≥ $3K): browser fires Meta Pixel `Lead`, and the form POSTs the lead payload to `/api/lead` (a Cloudflare Pages Function).
 4. `/api/lead` (`functions/api/lead.js`) fires Meta Conversions API (CAPI) `Lead` server-side using the **same `event_id`** as the browser event (Meta dedupes them into one), and POSTs the full payload directly to the GHL inbound webhook — no Zapier in the path. GHL creates/updates the contact.
-5. Qualified leads then see the Calendly embed inline; booking a slot fires Meta `Schedule` **browser + server, deduped the same way as `Lead`** — the site POSTs a `Schedule` payload tagged `Booked` to the same GHL webhook when a booking completes.
+5. Qualified leads then see the Calendly embed inline; booking a slot fires Meta `Schedule` **browser + server, deduped the same way as `Lead`**. The `Schedule` payload is **not** forwarded to GHL — booking delivery is owned by Workflow #2 (Calendly → GHL). See §4.
 6. **Soft-DQ** (Nurture) leads skip the Pixel/CAPI `Lead` event entirely but still POST to `/api/lead`, which still forwards to the GHL webhook tagged `Nurture` — so every lead reaches GHL, but only qualified ones count as a Meta conversion.
 
 ## 2. Environment Variables
@@ -85,13 +85,13 @@ Internal-only flag: **Tier2** means the lead marked $7K+ monthly ad spend. It's 
 
 ## 4. Booking Sync — Calendly → GHL
 
-With server-side `Schedule` now implemented (see §1), the site itself POSTs a `Schedule` payload tagged `Booked` to the same GHL webhook when a booking completes — so a separate Calendly → GHL integration may be redundant purely for status purposes. That said, Calendly's native GHL integration (Calendly "Invitee Created" → GHL) is still more reliable for catching bookings made **outside** the funnel (e.g. someone booking directly off a shared Calendly link rather than through `/roofers`), since those never touch `/api/lead` at all.
+**Decided: bookings reach GHL only via Calendly's native integration (Workflow #2 — Calendly "Invitee Created" → GHL).** `/api/lead` deliberately does **not** forward `Schedule` payloads to the webhook.
 
-Two options, pick one (or run both — they're not mutually exclusive since both key off the invitee's email):
-- **Site-only:** rely on the `Schedule` POST from `/api/lead`. Simpler, one less integration to maintain, but only catches bookings that go through the funnel.
-- **Calendly-native integration too:** configure Calendly's "Invitee Created" trigger to update GHL directly. Catches every booking regardless of source, at the cost of a second integration to keep working.
+> **Why — this caused real data loss.** A `Schedule` payload carries only booking data (name, email, phone). Forwarding it re-triggered Workflow #1's *Create contact* with a body missing `decisionMaker`, `adSpend`, `states`, `googleAdsStatus`, and `drivingFactor` — **wiping those fields on a contact that already had them**. It hit only leads who booked (the best ones), and silently. `forwardToZapier` in `functions/api/lead.js` now returns early unless the resolved event name is `Lead`.
 
-Owner's call — this hasn't been decided yet.
+Meta still receives the booking: the CAPI `Schedule` event fires independently of CRM forwarding, deduped against the browser pixel. Only the redundant CRM write was removed.
+
+Calendly-native is also the more complete path regardless — it catches bookings made **outside** the funnel (someone using a shared Calendly link directly), which never touch `/api/lead` at all.
 
 ## 5. Calendly Configuration Checklist
 
@@ -110,7 +110,7 @@ Owner's call — this hasn't been decided yet.
 3. Set the environment variables from section 2 in the Cloudflare dashboard, **including `META_TEST_EVENT_CODE`**, then trigger a redeploy so the `VITE_` vars (if changed) pick up.
 4. Submit the form as a qualified test lead (decision-maker = Yes, ad spend ≥ $3K). In Meta Events Manager → Test Events, expect **one `Lead` event with two sources — browser and server — shown as deduplicated**. That's the pass condition; two separate undeduplicated events means the `event_id` isn't lining up. (See "deduplication looks like one row" below before you conclude the server side is broken.)
 5. Check GHL: confirm a contact was created, tagged `Qualified`, with the custom fields populated.
-6. Book a real Calendly test slot from the qualified flow. Confirm the `Schedule` event appears in Events Manager (browser + server, deduplicated) and the GHL contact picks up the `Booked` tag. Cancel the test booking afterward so it doesn't sit on a real calendar slot.
+6. Book a real Calendly test slot from the qualified flow. Confirm the `Schedule` event appears in Events Manager (browser + server, deduplicated), that Workflow #2 updates the GHL contact, and — critically — that the contact's **qualifier fields are still populated** after the booking. Cancel the test booking afterward so it doesn't sit on a real calendar slot.
 7. Submit a soft-DQ test (ad spend = "Under $3K"). Confirm: no Calendly booking is shown to the "lead," the GHL contact is tagged `Nurture`, and **no `Lead` event appears in Events Manager** for this submit.
 8. Remove `META_TEST_EVENT_CODE` from the Cloudflare Pages environment variables. Leaving it set routes all future real conversions to Test Events instead of live reporting.
 9. In Ads Manager: optimize the campaign on the `Lead` event at cold start (more volume, faster learning). Revisit switching the optimization target to `Schedule` once you're at roughly 15–20 bookings/week — that's a stronger signal once there's enough volume to support it.
