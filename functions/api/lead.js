@@ -182,8 +182,14 @@ export async function onRequestPost(context) {
     })
   }
 
+  // `spam: true` means the client-side honeypot was tripped. Such a submit
+  // still reaches the CRM (tagged SpamSuspect, so a false positive is
+  // visible and recoverable rather than silently dropped) but must never
+  // fire a Meta conversion. Schedule is exempt: completing a real Calendly
+  // booking is human intent regardless of what the honeypot thought.
+  const isSchedule = resolveEventName(payload) === 'Schedule'
   const tasks = []
-  if (payload.qualified === true || resolveEventName(payload) === 'Schedule') {
+  if ((payload.qualified === true && payload.spam !== true) || isSchedule) {
     tasks.push(sendCapiEvent(payload, context))
   }
   tasks.push(forwardToZapier(payload, context))
