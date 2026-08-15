@@ -48,7 +48,7 @@ The site POSTs directly to a GHL inbound webhook (`https://services.leadconnecto
   "googleAdsStatus": "Running now | Ran before, stopped | Never have",
   "adSpend": "Under $3K | $3K–$5K | $5K–$7K | $7K+",
   "drivingFactor": "…",
-  "website": "",
+  "referral_code": "",
   "event_id": "uuid",
   "tags": ["Qualified"],
   "qualified": true,
@@ -73,7 +73,7 @@ The site POSTs directly to a GHL inbound webhook (`https://services.leadconnecto
 Notes on the payload:
 - `tags` is `["Qualified"]`, `["Qualified","Tier2"]`, `["Qualified","LowBudget"]`, `["Nurture"]`, or `["Booked"]` for a completed booking — never empty.
 - `states` is a **comma-separated string**, not an array (`"Texas, Oklahoma"`), even though the form collects it as a multi-select. It's flattened on submit specifically so the GHL "States" custom field keeps receiving the same shape it always has — don't change this without updating the GHL field mapping.
-- `website` is the spam honeypot field. It's always an empty string on submits that reach the webhook (a bot that fills it gets silently routed to the nurture UI and never fires this POST) — safe to ignore in your mapping.
+- `referral_code` is the spam honeypot field, and `spam` is the boolean saying whether it was tripped. See §3.2 — a trip **flags** a submit, it no longer blocks it. Both are safe to ignore in your field mapping; the `SpamSuspect` tag is the part you act on.
 - `attribution` keys are **omitted, not blank**, when not captured (e.g. no `fbclid` on a direct visit) — don't assume every key is present.
 
 Suggested GHL mapping:
@@ -96,6 +96,20 @@ Two consequences worth knowing:
 2. **`Nurture` volume will drop sharply**, since only non-decision-makers land there now. A near-empty Nurture segment is expected, not a broken form.
 
 Changing any of this means editing the qualify block in `src/roofers/PreQualForm.jsx` (`handleSubmitStep`) — it's the single source of truth for who qualifies.
+
+### 3.2 The spam honeypot flags, it does not block
+
+The form carries a hidden `referral_code` field that real users never see. If it comes back filled, the submit is probably a bot.
+
+**A trip flags the submit and lets it through.** The lead is tagged `SpamSuspect`, `spam: true` rides along in the payload, and the Meta conversion event is withheld — browser pixel and CAPI both. Everything else proceeds normally: they reach the CRM, and if they qualified they can still book.
+
+**Why it doesn't block.** It used to. A trip routed the person to the nurture screen and fired *nothing* — no webhook POST, no pixel, no log line anywhere. That makes a false positive invisible and unrecoverable: a real roofer is told they aren't eligible, and there is no record they ever tried. You cannot tell "no bots this week" apart from "silently turning away customers," which is the worst property a filter can have.
+
+That wasn't hypothetical. The field used to be named `website`, and password managers and browser autofill routinely ignore `autocomplete="off"` on a field with that name — filling it with a URL and misfiring the honeypot on a genuine visitor. It's now named `referral_code`, which no autofill heuristic targets, while a naive bot filling every input still trips it.
+
+**What to do with `SpamSuspect` in GHL:** don't auto-delete. Route it to a review list. If real people keep landing there, the honeypot is still misfiring and the name needs to change again — and you'll be able to *see* that now, which is the entire point.
+
+The trade accepted here: a bot could in principle reach the Calendly embed. It would still have to complete Calendly's own booking flow, and a junk booking is visible and cancellable. A silently rejected qualified roofer is neither.
 
 ## 4. Booking Sync — Calendly → GHL
 

@@ -33,11 +33,18 @@ const initialFields = {
   googleAdsStatus: '',
   adSpend: '',
   drivingFactor: '',
-  // Honeypot — real users never see or fill this field (offscreen +
-  // aria-hidden + unreachable by Tab). A filled value marks the submit
-  // as bot traffic so we can soft-DQ it without polluting Meta's Lead
-  // signal or the Zapier webhook.
-  website: '',
+  // Honeypot — offscreen, aria-hidden, unreachable by Tab. A filled value
+  // marks the submit as likely bot traffic.
+  //
+  // Named `referral_code`, NOT `website`: password managers and browser
+  // autofill routinely ignore autocomplete="off" and will happily fill a
+  // field named "website" with a URL. That misfires the honeypot on real
+  // people. No autofill heuristic targets "referral_code", while a naive
+  // bot filling every input still trips it.
+  //
+  // A trip FLAGS, it does not block — see handleSubmitStep. Blocking made
+  // a false positive invisible and unrecoverable.
+  referral_code: '',
 }
 
 function TextField({ id, label, type = 'text', value, onChange, error, hint, autoComplete }) {
@@ -354,19 +361,6 @@ export default function PreQualForm() {
       return
     }
 
-    // Honeypot tripped: a bot filled the offscreen "website" field. Fire
-    // NOTHING — no trackLead, no postLead — and route to the same
-    // soft-DQ nurture branch a genuinely unqualified human would see, so
-    // the bot gets a plausible-looking success and Meta's Lead signal
-    // stays clean.
-    if (fields.website.trim()) {
-      setQualified(false)
-      setSubmitted(true)
-      setStep(3)
-      setLiveMessage("We might not be the right fit yet — here's how to get ready.")
-      return
-    }
-
     // Step 2 submit: run qualify logic, fire tracking, POST lead.
     //
     // Authority is the only gate. Budget does NOT disqualify — a roofer who
@@ -375,15 +369,34 @@ export default function PreQualForm() {
     // gets routed to nurture.
     const isQualified = fields.decisionMaker !== 'No'
 
+    // Honeypot tripped. This FLAGS the submit, it does not block it.
+    //
+    // The old behaviour was to silently route the person to the nurture
+    // screen and fire nothing at all — no POST, no pixel, no log. That
+    // makes a false positive completely invisible: a real roofer gets told
+    // they aren't eligible and you have no record they ever tried. Given
+    // this form ran with the honeypot named `website` (see initialFields),
+    // false positives were likely, not hypothetical.
+    //
+    // So: they proceed exactly as they otherwise would, but we tag the
+    // submit `SpamSuspect` and set `spam: true` so it's visible in the CRM,
+    // and we withhold the Meta conversion event. A wrongly-flagged customer
+    // keeps their booking; a real bot costs one CRM row and never pollutes
+    // the ad signal.
+    const trippedHoneypot = fields.referral_code.trim().length > 0
+
     let tags
     if (!isQualified) tags = ['Nurture']
     else if (fields.adSpend === '$7K+') tags = ['Qualified', 'Tier2']
     else if (fields.adSpend === 'Under $3K') tags = ['Qualified', 'LowBudget']
     else tags = ['Qualified']
+    if (trippedHoneypot) tags = [...tags, 'SpamSuspect']
 
     const eventId = newEventId()
 
-    if (isQualified) {
+    // Flagged submits never fire the pixel — Meta's Lead signal stays clean.
+    // The server applies the same rule to CAPI via the `spam` flag.
+    if (isQualified && !trippedHoneypot) {
       trackLead(eventId)
     }
 
@@ -394,6 +407,7 @@ export default function PreQualForm() {
       event_id: eventId,
       tags,
       qualified: isQualified,
+      spam: trippedHoneypot,
       page: 'roofers',
       attribution: getAttribution(),
     })
@@ -464,20 +478,21 @@ export default function PreQualForm() {
                 autoComplete="tel"
               />
               {/* Honeypot — offscreen and unreachable by keyboard/screen reader.
-                  Real users never see or fill this; a filled value marks the
-                  submit as bot traffic (handled in handleSubmitStep). */}
+                  Real users never see it; a filled value flags (never blocks)
+                  the submit. See initialFields for why it isn't named
+                  "website" — that name attracts password-manager autofill. */}
               <div
                 style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' }}
                 aria-hidden="true"
               >
                 <input
                   type="text"
-                  name="website"
+                  name="referral_code"
                   autoComplete="off"
                   tabIndex={-1}
                   aria-hidden="true"
-                  value={fields.website}
-                  onChange={(e) => update('website', e.target.value)}
+                  value={fields.referral_code}
+                  onChange={(e) => update('referral_code', e.target.value)}
                 />
               </div>
               <button
