@@ -6,10 +6,10 @@ Owner: Kendall. This is the checklist for taking the `/roofers` ad-destination p
 
 1. Ad click lands on `/roofers` — a static page in the same Vite build as the main site, served by Cloudflare Pages.
 2. Visitor completes the 3-step pre-qual form (`src/roofers/PreQualForm.jsx`).
-3. **Qualified** lead (decision-maker + ad spend ≥ $3K): browser fires Meta Pixel `Lead`, and the form POSTs the lead payload to `/api/lead` (a Cloudflare Pages Function).
+3. **Qualified** lead (decision-maker — see §3.1): browser fires Meta Pixel `Lead`, and the form POSTs the lead payload to `/api/lead` (a Cloudflare Pages Function).
 4. `/api/lead` (`functions/api/lead.js`) fires Meta Conversions API (CAPI) `Lead` server-side using the **same `event_id`** as the browser event (Meta dedupes them into one), and POSTs the full payload directly to the GHL inbound webhook — no Zapier in the path. GHL creates/updates the contact.
 5. Qualified leads then see the Calendly embed inline; booking a slot fires Meta `Schedule` **browser + server, deduped the same way as `Lead`**. The `Schedule` payload is **not** forwarded to GHL — booking delivery is owned by Workflow #2 (Calendly → GHL). See §4.
-6. **Soft-DQ** (Nurture) leads skip the Pixel/CAPI `Lead` event entirely but still POST to `/api/lead`, which still forwards to the GHL webhook tagged `Nurture` — so every lead reaches GHL, but only qualified ones count as a Meta conversion.
+6. **Soft-DQ** (Nurture) leads — non-decision-makers only — skip the Pixel/CAPI `Lead` event entirely but still POST to `/api/lead`, which still forwards to the GHL webhook tagged `Nurture` — so every lead reaches GHL, but only qualified ones count as a Meta conversion.
 
 ## 2. Environment Variables
 
@@ -44,7 +44,7 @@ The site POSTs directly to a GHL inbound webhook (`https://services.leadconnecto
   "email": "…",
   "phone": "…",
   "decisionMaker": "Yes | I share the decision | No",
-  "states": "…",
+  "states": "Texas, Oklahoma",
   "googleAdsStatus": "Running now | Ran before, stopped | Never have",
   "adSpend": "Under $3K | $3K–$5K | $5K–$7K | $7K+",
   "drivingFactor": "…",
@@ -71,17 +71,31 @@ The site POSTs directly to a GHL inbound webhook (`https://services.leadconnecto
 > **Now includes `event_name`** (not shown above — added alongside the fields above): either `"Lead"` (pre-qual submit) or `"Schedule"` (completed booking). GHL workflows should branch on this to tell a new pre-qual submission apart from a completed booking, rather than relying on `tags` alone.
 
 Notes on the payload:
-- `tags` is `["Qualified"]`, `["Qualified","Tier2"]`, `["Nurture"]`, or `["Booked"]` for a completed booking — never empty.
+- `tags` is `["Qualified"]`, `["Qualified","Tier2"]`, `["Qualified","LowBudget"]`, `["Nurture"]`, or `["Booked"]` for a completed booking — never empty.
+- `states` is a **comma-separated string**, not an array (`"Texas, Oklahoma"`), even though the form collects it as a multi-select. It's flattened on submit specifically so the GHL "States" custom field keeps receiving the same shape it always has — don't change this without updating the GHL field mapping.
 - `website` is the spam honeypot field. It's always an empty string on submits that reach the webhook (a bot that fills it gets silently routed to the nurture UI and never fires this POST) — safe to ignore in your mapping.
 - `attribution` keys are **omitted, not blank**, when not captured (e.g. no `fbclid` on a direct visit) — don't assume every key is present.
 
 Suggested GHL mapping:
 - **Contact fields:** `fullName` → name, `email` → email, `phone` → phone.
-- **Contact tags:** map `tags[]` directly to GHL contact tags — `Qualified`, `Tier2`, `Nurture`, `Booked`.
+- **Contact tags:** map `tags[]` directly to GHL contact tags — `Qualified`, `Tier2`, `LowBudget`, `Nurture`, `Booked`.
 - **Custom fields to create:** Ad Spend, Decision Maker, States, Google Ads History (`googleAdsStatus`), UTM Campaign, UTM Source, fbclid, event_id (useful for cross-referencing a lead against Meta Events Manager).
 - **Pipeline:** a dedicated opportunity/pipeline with stages `New → Contacted → Booked → Won/Lost`.
 
-Internal-only flag: **Tier2** means the lead marked $7K+ monthly ad spend. It's a prioritization signal for you — never surface it to the lead or put it in outbound copy.
+Internal-only flags: **Tier2** means the lead marked $7K+ monthly ad spend; **LowBudget** means they marked Under $3K. Both are prioritization signals for you — never surface either to the lead or put them in outbound copy.
+
+### 3.1 Qualification rules
+
+**Authority is the only gate.** A lead is `Qualified` — fires Meta `Lead`, sees the Calendly embed, can book — if and only if they answer anything other than **"No"** to "Are you the owner / decision-maker?" (`Yes` and `I share the decision` both pass).
+
+**Budget does not disqualify.** A roofer who picks "Under $3K" still books a call. They're tagged `LowBudget` so you know what you're walking into before you dial, but the funnel doesn't stop them. Only a non-decision-maker gets routed to the `Nurture` branch.
+
+Two consequences worth knowing:
+
+1. **The Meta `Lead` event now covers a broader audience.** Because sub-$3K leads fire `Lead`, the campaign optimizes toward finding more of them too. If cost-per-booked-call drifts up or the mix skews small, that's the mechanism — the fix is Ads Manager targeting or switching the optimization event to `Schedule`, not re-adding a budget gate to the form.
+2. **`Nurture` volume will drop sharply**, since only non-decision-makers land there now. A near-empty Nurture segment is expected, not a broken form.
+
+Changing any of this means editing the qualify block in `src/roofers/PreQualForm.jsx` (`handleSubmitStep`) — it's the single source of truth for who qualifies.
 
 ## 4. Booking Sync — Calendly → GHL
 
@@ -108,10 +122,11 @@ Calendly-native is also the more complete path regardless — it catches booking
 1. Merge PR #1 (`minimal-rewrite`), then PR #2 (`roofers-landing`). Cloudflare Pages auto-deploys on merge to the production branch.
 2. Confirm both `https://rebootmedia.us/roofers` and `https://rebootmedia.us/privacy` resolve **extension-less** (no `.html` in the URL, no redirect loop).
 3. Set the environment variables from section 2 in the Cloudflare dashboard, **including `META_TEST_EVENT_CODE`**, then trigger a redeploy so the `VITE_` vars (if changed) pick up.
-4. Submit the form as a qualified test lead (decision-maker = Yes, ad spend ≥ $3K). In Meta Events Manager → Test Events, expect **one `Lead` event with two sources — browser and server — shown as deduplicated**. That's the pass condition; two separate undeduplicated events means the `event_id` isn't lining up. (See "deduplication looks like one row" below before you conclude the server side is broken.)
+4. Submit the form as a qualified test lead (decision-maker = Yes; any ad spend, and pick two or more states to exercise the multi-select). In Meta Events Manager → Test Events, expect **one `Lead` event with two sources — browser and server — shown as deduplicated**. That's the pass condition; two separate undeduplicated events means the `event_id` isn't lining up. (See "deduplication looks like one row" below before you conclude the server side is broken.)
 5. Check GHL: confirm a contact was created, tagged `Qualified`, with the custom fields populated.
 6. Book a real Calendly test slot from the qualified flow. Confirm the `Schedule` event appears in Events Manager (browser + server, deduplicated), that Workflow #2 updates the GHL contact, and — critically — that the contact's **qualifier fields are still populated** after the booking. Cancel the test booking afterward so it doesn't sit on a real calendar slot.
-7. Submit a soft-DQ test (ad spend = "Under $3K"). Confirm: no Calendly booking is shown to the "lead," the GHL contact is tagged `Nurture`, and **no `Lead` event appears in Events Manager** for this submit.
+7. Submit a soft-DQ test — **decision-maker = "No"** (ad spend no longer disqualifies; see §3.1). Confirm: no Calendly booking is shown to the "lead," the GHL contact is tagged `Nurture`, and **no `Lead` event appears in Events Manager** for this submit.
+   - Then submit a second test with decision-maker = Yes and ad spend = "Under $3K". This one **must** reach Calendly and **must** fire `Lead`, tagged `Qualified` + `LowBudget`. If it lands in nurture instead, the budget gate wasn't fully removed.
 8. Remove `META_TEST_EVENT_CODE` from the Cloudflare Pages environment variables. Leaving it set routes all future real conversions to Test Events instead of live reporting.
 9. In Ads Manager: optimize the campaign on the `Lead` event at cold start (more volume, faster learning). Revisit switching the optimization target to `Schedule` once you're at roughly 15–20 bookings/week — that's a stronger signal once there's enough volume to support it.
 
