@@ -30,10 +30,10 @@ function Hero() {
   return (
     <section className="mx-auto max-w-3xl px-6 pb-20 pt-10 text-center md:pb-28 md:pt-16">
       <h1 className="text-3xl font-extrabold leading-[1.15] tracking-tight text-roof-ink sm:text-4xl md:text-5xl">
-        A roofing calendar that stays full — every season.
+        An East Texas roofing calendar that stays full — every season.
       </h1>
       <p className="mx-auto mt-6 max-w-xl text-[17px] leading-relaxed text-roof-ink md:text-lg">
-        We build one system that keeps qualified appointments booked on your calendar. Storm or shine. Guaranteed in writing.
+        We build one system that keeps qualified appointments booked on your calendar — Tyler, Longview, Nacogdoches, and everywhere between. Storm or shine. Guaranteed in writing.
       </p>
       <div className="mt-8 flex flex-col items-center gap-3">
         <PrimaryCTA />
@@ -50,10 +50,10 @@ function Problem() {
     <section className="border-t border-roof-border-subtle bg-roof-paper">
       <div className="mx-auto max-w-2xl px-6 py-16 md:py-20">
         <h2 className="mb-5 text-2xl font-bold leading-tight text-roof-ink md:text-3xl">
-          Roofing was never supposed to be a chase.
+          Roofing in East Texas was never supposed to be a chase.
         </h2>
         <p className="text-[17px] leading-relaxed text-roof-ink md:text-lg">
-          Storm to storm. Referral to referral. Busy one month, dead the next. The chase costs you the things that matter — your focus, your craft, your time at home. The problem was never you. It's that you never had a system feeding you work on purpose.
+          Hail comes through, the out-of-town crews roll in behind it, and work that should have been yours goes to a truck with an out-of-state plate. Then the storm passes and it's quiet until the next one. Busy one month, dead the next. The chase costs you the things that matter — your focus, your craft, your time at home. The problem was never you, and it was never your work. It's that you never had a system feeding you jobs on purpose, in your own backyard.
         </p>
       </div>
     </section>
@@ -68,7 +68,7 @@ function WhatWeBuild() {
     },
     {
       title: 'Campaigns built to book:',
-      desc: 'the right roofs, the right searches, in your service area.',
+      desc: 'the right roofs, the right searches, across the counties you actually drive — Smith, Gregg, Angelina, Nacogdoches, and out to the county lines you run.',
     },
     {
       title: 'A calendar that fills:',
@@ -98,10 +98,10 @@ function Unlock() {
     <section className="border-t border-roof-border-subtle bg-roof-paper">
       <div className="mx-auto max-w-2xl px-6 py-16 md:py-20">
         <h2 className="mb-5 text-2xl font-bold leading-tight text-roof-ink md:text-3xl">
-          No more dry seasons.
+          No more waiting on the next hail map.
         </h2>
         <p className="text-[17px] leading-relaxed text-roof-ink md:text-lg">
-          Steady work you can plan around. The freedom to focus on the craft, lead your crew, and be home for dinner — instead of living on the phone chasing the next job. Roofing that feels like a business, not a gamble.
+          Steady work you can plan around — not a scramble every time a storm line pushes through the Piney Woods. The freedom to focus on the craft, lead your crew, and be home for dinner instead of living on the phone chasing the next job. Roofing that feels like a business, not a gamble on the weather.
         </p>
       </div>
     </section>
@@ -161,7 +161,7 @@ function ScarcityAndForm() {
             We take 5 roofers per cohort.
           </h2>
           <p className="text-[17px] leading-relaxed text-roof-ink md:text-lg">
-            So every account gets built right, not rushed. See if a slot is yours.
+            So every account gets built right, not rushed. If you run crews in East Texas, see if a slot is yours.
           </p>
         </div>
         <div className="rounded-2xl border border-roof-border-subtle bg-roof-surface p-6 md:p-10">
