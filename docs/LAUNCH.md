@@ -44,7 +44,7 @@ The site POSTs directly to a GHL inbound webhook (`https://services.leadconnecto
   "email": "…",
   "phone": "…",
   "decisionMaker": "Yes | I share the decision | No",
-  "states": "Texas, Oklahoma",
+  "city": "Tyler",
   "googleAdsStatus": "Running now | Ran before, stopped | Never have",
   "adSpend": "Under $3K | $3K–$5K | $5K–$7K | $7K+",
   "drivingFactor": "…",
@@ -72,14 +72,14 @@ The site POSTs directly to a GHL inbound webhook (`https://services.leadconnecto
 
 Notes on the payload:
 - `tags` is `["Qualified"]`, `["Qualified","Tier2"]`, `["Qualified","LowBudget"]`, `["Nurture"]`, or `["Booked"]` for a completed booking — never empty.
-- `states` is a **comma-separated string**, not an array (`"Texas, Oklahoma"`), even though the form collects it as a multi-select. It's flattened on submit specifically so the GHL "States" custom field keeps receiving the same shape it always has — don't change this without updating the GHL field mapping.
+- `city` is a free-text string (`"Tyler"`) — the single city the roofer operates out of. It replaced the earlier `states` multi-select, so map it to GHL's **native City contact field**, not to the old `States` custom field.
 - `referral_code` is the spam honeypot field, and `spam` is the boolean saying whether it was tripped. See §3.2 — a trip **flags** a submit, it no longer blocks it. Both are safe to ignore in your field mapping; the `SpamSuspect` tag is the part you act on.
 - `attribution` keys are **omitted, not blank**, when not captured (e.g. no `fbclid` on a direct visit) — don't assume every key is present.
 
 Suggested GHL mapping:
 - **Contact fields:** `fullName` → name, `email` → email, `phone` → phone.
 - **Contact tags:** map `tags[]` directly to GHL contact tags — `Qualified`, `Tier2`, `LowBudget`, `Nurture`, `Booked`.
-- **Custom fields to create:** Ad Spend, Decision Maker, States, Google Ads History (`googleAdsStatus`), UTM Campaign, UTM Source, fbclid, event_id (useful for cross-referencing a lead against Meta Events Manager).
+- **Custom fields to create:** Ad Spend, Decision Maker, Google Ads History (`googleAdsStatus`), UTM Campaign, UTM Source, fbclid, event_id (useful for cross-referencing a lead against Meta Events Manager). `city` maps to GHL's native City field — no custom field needed.
 - **Pipeline:** a dedicated opportunity/pipeline with stages `New → Contacted → Booked → Won/Lost`.
 
 Internal-only flags: **Tier2** means the lead marked $7K+ monthly ad spend; **LowBudget** means they marked Under $3K. Both are prioritization signals for you — never surface either to the lead or put them in outbound copy.
@@ -115,7 +115,7 @@ The trade accepted here: a bot could in principle reach the Calendly embed. It w
 
 **Decided: bookings reach GHL only via Calendly's native integration (Workflow #2 — Calendly "Invitee Created" → GHL).** `/api/lead` deliberately does **not** forward `Schedule` payloads to the webhook.
 
-> **Why — this caused real data loss.** A `Schedule` payload carries only booking data (name, email, phone). Forwarding it re-triggered Workflow #1's *Create contact* with a body missing `decisionMaker`, `adSpend`, `states`, `googleAdsStatus`, and `drivingFactor` — **wiping those fields on a contact that already had them**. It hit only leads who booked (the best ones), and silently. `forwardToZapier` in `functions/api/lead.js` now returns early unless the resolved event name is `Lead`.
+> **Why — this caused real data loss.** A `Schedule` payload carries only booking data (name, email, phone). Forwarding it re-triggered Workflow #1's *Create contact* with a body missing `decisionMaker`, `adSpend`, `city`, `googleAdsStatus`, and `drivingFactor` — **wiping those fields on a contact that already had them**. It hit only leads who booked (the best ones), and silently. `forwardToZapier` in `functions/api/lead.js` now returns early unless the resolved event name is `Lead`.
 
 Meta still receives the booking: the CAPI `Schedule` event fires independently of CRM forwarding, deduped against the browser pixel. Only the redundant CRM write was removed.
 
@@ -136,7 +136,7 @@ Calendly-native is also the more complete path regardless — it catches booking
 1. Merge PR #1 (`minimal-rewrite`), then PR #2 (`roofers-landing`). Cloudflare Pages auto-deploys on merge to the production branch.
 2. Confirm both `https://rebootmedia.us/roofers` and `https://rebootmedia.us/privacy` resolve **extension-less** (no `.html` in the URL, no redirect loop).
 3. Set the environment variables from section 2 in the Cloudflare dashboard, **including `META_TEST_EVENT_CODE`**, then trigger a redeploy so the `VITE_` vars (if changed) pick up.
-4. Submit the form as a qualified test lead (decision-maker = Yes; any ad spend, and pick two or more states to exercise the multi-select). In Meta Events Manager → Test Events, expect **one `Lead` event with two sources — browser and server — shown as deduplicated**. That's the pass condition; two separate undeduplicated events means the `event_id` isn't lining up. (See "deduplication looks like one row" below before you conclude the server side is broken.)
+4. Submit the form as a qualified test lead (decision-maker = Yes; any ad spend, any city). In Meta Events Manager → Test Events, expect **one `Lead` event with two sources — browser and server — shown as deduplicated**. That's the pass condition; two separate undeduplicated events means the `event_id` isn't lining up. (See "deduplication looks like one row" below before you conclude the server side is broken.)
 5. Check GHL: confirm a contact was created, tagged `Qualified`, with the custom fields populated.
 6. Book a real Calendly test slot from the qualified flow. Confirm the `Schedule` event appears in Events Manager (browser + server, deduplicated), that Workflow #2 updates the GHL contact, and — critically — that the contact's **qualifier fields are still populated** after the booking. Cancel the test booking afterward so it doesn't sit on a real calendar slot.
 7. Submit a soft-DQ test — **decision-maker = "No"** (ad spend no longer disqualifies; see §3.1). Confirm: no Calendly booking is shown to the "lead," the GHL contact is tagged `Nurture`, and **no `Lead` event appears in Events Manager** for this submit.
@@ -179,4 +179,4 @@ To confirm the server half actually fired:
 - **Calendly prefill is positional, not named:** `customAnswers.a1` in `src/roofers/CalendlyEmbed.jsx` maps to whatever is currently the event's **first** custom question — right now that's "Company Name" on `hello-rebootmedia/diagnostic`. Reordering or adding questions in the Calendly dashboard silently breaks the prefill (this already happened once: phone ended up landing in the Company Name field). Anyone changing Calendly questions on this event must check `src/roofers/CalendlyEmbed.jsx` afterward.
 - **Motion polish:** the "framer-feel" interaction polish was deliberately deferred for this launch — functional over animated.
 - **Privacy policy:** `public/privacy.html` is a draft. The owner (Kendall) needs to actually read and sign off on it before it's representing the business live.
-- **Guarantee copy:** on-page claims — "20 qualified appointments in 90 days," "5 roofers per cohort," "free month" — must match the actual contract terms before any ad spend goes live against this page. If the contract changes, this copy has to change with it.
+- **Guarantee copy:** on-page claims — "20 qualified appointments in 90 days," "10 roofers per cohort," "free month" — must match the actual contract terms before any ad spend goes live against this page. If the contract changes, this copy has to change with it.
