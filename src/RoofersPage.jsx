@@ -38,7 +38,7 @@ function Hero() {
       <div className="mt-8 flex flex-col items-center gap-3">
         <PrimaryCTA />
         <span className="text-sm font-medium text-roof-ink">
-          Guaranteed. 5 roofers per cohort. First appointment within 14 days.
+          Guaranteed. 10 roofers per cohort. First appointment within 14 days.
         </span>
       </div>
     </section>
@@ -53,7 +53,7 @@ function Problem() {
           Roofing in East Texas was never supposed to be a chase.
         </h2>
         <p className="text-[17px] leading-relaxed text-roof-ink md:text-lg">
-          Hail comes through, the out-of-town crews roll in behind it, and work that should have been yours goes to a truck with an out-of-state plate. Then the storm passes and it's quiet until the next one. Busy one month, dead the next. The chase costs you the things that matter — your focus, your craft, your time at home. The problem was never you, and it was never your work. It's that you never had a system feeding you jobs on purpose, in your own backyard.
+          Storm to storm. Referral to referral. A hail line comes through and the phone runs hot, then it goes quiet until the next one. Busy one month, dead the next. The chase costs you the things that matter — your focus, your craft, your time at home. The problem was never you, and it was never your work. It's that you never had a system feeding you jobs on purpose, right here at home.
         </p>
       </div>
     </section>
@@ -158,7 +158,7 @@ function ScarcityAndForm() {
       <div className="mx-auto max-w-2xl px-6 py-16 md:py-20">
         <div className="mb-12 text-center">
           <h2 className="mb-5 text-2xl font-bold leading-tight text-roof-ink md:text-3xl">
-            We take 5 roofers per cohort.
+            We take 10 roofers per cohort.
           </h2>
           <p className="text-[17px] leading-relaxed text-roof-ink md:text-lg">
             So every account gets built right, not rushed. If you run crews in East Texas, see if a slot is yours.
