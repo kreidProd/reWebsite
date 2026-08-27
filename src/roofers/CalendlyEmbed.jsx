@@ -6,7 +6,7 @@
 import { InlineWidget, useCalendlyEventListener } from 'react-calendly'
 import { newEventId, trackSchedule, postSchedule, getAttribution } from './tracking'
 
-const DEFAULT_CALENDLY_URL = 'https://calendly.com/hello-rebootmedia/diagnostic'
+const DEFAULT_CALENDLY_URL = 'https://calendly.com/hello-rebootmedia/strategycall'
 
 // Maps our snake_case attribution keys to the camelCase shape react-calendly's
 // InlineWidget expects for its `utm` prop.
@@ -61,12 +61,17 @@ export default function CalendlyEmbed({ name, email, phone, company, onScheduled
           name,
           email,
           // customAnswers.a1 maps to Calendly's FIRST custom question on the
-          // hello-rebootmedia/diagnostic event, which is "Company Name" (question
-          // 2 is "Any questions?" — there is no phone question). This mapping is
-          // positional, not named, so it silently breaks if anyone reorders,
-          // deletes, or adds questions in the Calendly dashboard. If prefill
-          // starts landing in the wrong field, check the event's question order
-          // in Calendly before touching this code.
+          // hello-rebootmedia/strategycall event, which is "Company Name"
+          // (question 2 is "Any questions?" — there is no phone question). This
+          // mapping is positional, not named, so it silently breaks if anyone
+          // reorders, deletes, or adds questions in the Calendly dashboard. If
+          // prefill starts landing in the wrong field, check the event's
+          // question order in Calendly before touching this code.
+          //
+          // The event this points at must be ACTIVE in Calendly. Deactivating
+          // it makes the embed render "This Calendly URL is not valid" to every
+          // qualified lead, with nothing failing loudly on our side — that is
+          // exactly how the previous /diagnostic event broke this.
           customAnswers: { a1: company },
         }}
         utm={utm}

@@ -123,7 +123,7 @@ Calendly-native is also the more complete path regardless — it catches booking
 
 ## 5. Calendly Configuration Checklist
 
-- Event type: `hello-rebootmedia/diagnostic` (the URL baked into `src/roofers/CalendlyEmbed.jsx` as the default — confirm it matches what's live in your Calendly account, or set `VITE_CALENDLY_URL` to override).
+- Event type: `hello-rebootmedia/strategycall` (the URL baked into `src/roofers/CalendlyEmbed.jsx` as the default — confirm it matches what's live in your Calendly account, or set `VITE_CALENDLY_URL` to override). **The event must be ACTIVE in Calendly.** Deactivating it renders "This Calendly URL is not valid" to every qualified lead with no error on our side — that is how the previous `/diagnostic` event silently broke booking. The same URL is also hardcoded in `src/App.jsx` for the homepage; change both together.
 - Workflows to have configured in Calendly:
   - [ ] Booking confirmation email
   - [ ] 24-hour reminder
@@ -176,7 +176,7 @@ To confirm the server half actually fired:
 
 ## 7. Known Limitations & Future Work
 
-- **Calendly prefill is positional, not named:** `customAnswers.a1` in `src/roofers/CalendlyEmbed.jsx` maps to whatever is currently the event's **first** custom question — right now that's "Company Name" on `hello-rebootmedia/diagnostic`. Reordering or adding questions in the Calendly dashboard silently breaks the prefill (this already happened once: phone ended up landing in the Company Name field). Anyone changing Calendly questions on this event must check `src/roofers/CalendlyEmbed.jsx` afterward.
+- **Calendly prefill is positional, not named:** `customAnswers.a1` in `src/roofers/CalendlyEmbed.jsx` maps to whatever is currently the event's **first** custom question — right now that's "Company Name" on `hello-rebootmedia/strategycall`. Reordering or adding questions in the Calendly dashboard silently breaks the prefill (this already happened once: phone ended up landing in the Company Name field). Anyone changing Calendly questions on this event must check `src/roofers/CalendlyEmbed.jsx` afterward.
 - **Motion polish:** the "framer-feel" interaction polish was deliberately deferred for this launch — functional over animated.
 - **Privacy policy:** `public/privacy.html` is a draft. The owner (Kendall) needs to actually read and sign off on it before it's representing the business live.
 - **Guarantee copy:** on-page claims — "20 qualified appointments in 90 days," "10 roofers per cohort," "free month" — must match the actual contract terms before any ad spend goes live against this page. If the contract changes, this copy has to change with it.

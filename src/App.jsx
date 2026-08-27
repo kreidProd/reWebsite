@@ -1,4 +1,4 @@
-const CALENDLY_URL = 'https://calendly.com/hello-rebootmedia/diagnostic';
+const CALENDLY_URL = 'https://calendly.com/hello-rebootmedia/strategycall';
 
 function Logo({ className = 'w-7 h-7' }) {
   return <img src="/logo.png" alt="Reboot Media" className={className} />;
